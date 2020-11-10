@@ -168,6 +168,9 @@ int main(int argc, char *argv[]) {
   int *cohort_data = NULL, *tile_axis_data = NULL;
   int *nidx_src = NULL, *nidx_land_src = NULL;
 
+  int *sc_cohort_data = NULL, *lc_cohort_data = NULL;
+  int n_sc_cohort, n_lc_cohort;
+
   int *idx_soil_src = NULL, *idx_glac_src = NULL, *idx_lake_src = NULL;
   int *soil_count_src = NULL, *glac_count_src = NULL, *lake_count_src = NULL;
   int *soil_tag_src = NULL, *glac_tag_src = NULL, *lake_tag_src = NULL,
@@ -183,6 +186,7 @@ int main(int argc, char *argv[]) {
   int has_glac = 0, has_lake = 0;
   int src_has_tile = 0, cold_has_tile = 0;
   int src_has_cohort = 0, cold_has_cohort = 0;
+  int src_has_sc_cohort = 0, src_has_lc_cohort = 0;
   int nz;
   double *z_axis_data = NULL;
   int print_memory = 0;
@@ -412,7 +416,6 @@ int main(int argc, char *argv[]) {
             "between source mosaic grid file and src_restart");
       nidx_src[n] = mpp_get_dimlen(fid_src[n], TILE_INDEX_NAME);
 
-      /* get the size of tile_index in land_src_restart */
       if (filetype == LANDTYPE)
         nidx_land_src[n] = nidx_src[n];
       else {
@@ -506,8 +509,8 @@ int main(int argc, char *argv[]) {
       mpp_get_var_dimname(fid_src[0], vid, m, varname);
       if (!strcmp(varname, timename)) has_taxis[l] = 1;
 
-      printf(" ***** l=%d varname=%s vid=%d var_type%d ndim_src=%d dim_name=%s \n",
-	     l, varnameB, vid, var_type[l], ndim_src[l], varname );
+      printf(" ***** REMAP_LAND l=%d varname=%s vid=%d var_type%d ndim_src=%d dim_name=%s \n",
+          l, varnameB, vid, var_type[l], ndim_src[l], varname);
     }
 
     if (ndim_src[l] == 3 && !has_taxis[l]) {
@@ -536,7 +539,6 @@ int main(int argc, char *argv[]) {
         nz_src[l] = mpp_get_dimlen(fid_src[0], varname);
       }
     }
-
   }
 
   /*------------------------------------------------------------------------------
@@ -578,6 +580,87 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+
+  /*------------------------------------------------------------------------------
+    get the sc_cohort data, currently it only contains in vegn data
+    -----------------------------------------------------------------------------*/
+  {
+    n_sc_cohort = 0;
+    src_has_sc_cohort = 0;
+    if (filetype == VEGNTYPE) {
+      int dimsize, m, vid, i;
+      int *tmp;
+      if (!mpp_dim_exist(fid_src[0], SC_COHORT_NAME)){
+        mpp_error("remap_land: dimension sc_cohort should exist when file_type is vegn");
+      }
+      n_sc_cohort = mpp_get_dimlen(fid_src[0], SC_COHORT_NAME);
+      if (n_sc_cohort != 1)
+        mpp_error("remap_land: size of sc_cohort should be 1, contact developer");
+
+      if (mpp_var_exist(fid_src[0], SC_COHORT_NAME)) {
+        src_has_sc_cohort = 1;
+        sc_cohort_data = (int *)malloc(n_sc_cohort * sizeof(int));
+        vid = mpp_get_varid(fid_src[0], SC_COHORT_NAME);
+        mpp_get_var_value(fid_src[0], vid, sc_cohort_data);
+        for (m = 1; m < nface_src; m++) {
+          dimsize = mpp_get_dimlen(fid_src[m], SC_COHORT_NAME);
+          if (dimsize != n_sc_cohort)
+            mpp_error(
+                "remap_land: the dimension size of sc_cohort is different between "
+                "faces");
+          tmp = (int *)malloc(n_sc_cohort * sizeof(int));
+          vid = mpp_get_varid(fid_src[m], SC_COHORT_NAME);
+          mpp_get_var_value(fid_src[m], vid, tmp);
+          for (i = 0; i < n_sc_cohort; i++) {
+            if (sc_cohort_data[i] != tmp[i])
+              mpp_error("remap_land: sc cohort value is different between faces");
+          }
+          free(tmp);
+        }
+      }
+    }
+  }
+
+  /*------------------------------------------------------------------------------
+    get the lc_cohort data, currently it only contains in vegn data
+    -----------------------------------------------------------------------------*/
+  {
+    n_lc_cohort = 0;
+    src_has_lc_cohort = 0;
+    if (filetype == VEGNTYPE) {
+      int dimsize, m, vid, i;
+      int *tmp;
+      if (!mpp_dim_exist(fid_src[0], LC_COHORT_NAME)){
+        mpp_error("remap_land: dimension lc_cohort should exist when file_type is vegn");
+      }
+      n_lc_cohort = mpp_get_dimlen(fid_src[0], LC_COHORT_NAME);
+      if (n_lc_cohort != 1)
+        mpp_error("remap_land: size of lc_cohort should be 1, contact developer");
+
+      if (mpp_var_exist(fid_src[0], LC_COHORT_NAME)) {
+        src_has_lc_cohort = 1;
+        lc_cohort_data = (int *)malloc(n_lc_cohort * sizeof(int));
+        vid = mpp_get_varid(fid_src[0], LC_COHORT_NAME);
+        mpp_get_var_value(fid_src[0], vid, lc_cohort_data);
+        for (m = 1; m < nface_src; m++) {
+          dimsize = mpp_get_dimlen(fid_src[m], LC_COHORT_NAME);
+          if (dimsize != n_lc_cohort)
+            mpp_error(
+                "remap_land: the dimension size of lc_cohort is different between "
+                "faces");
+          tmp = (int *)malloc(n_lc_cohort * sizeof(int));
+          vid = mpp_get_varid(fid_src[m], LC_COHORT_NAME);
+          mpp_get_var_value(fid_src[m], vid, tmp);
+          for (i = 0; i < n_lc_cohort; i++) {
+            if (lc_cohort_data[i] != tmp[i])
+              mpp_error("remap_land: lc cohort value is different between faces");
+          }
+          free(tmp);
+        }
+      }
+    }
+  }
+
 
   /*-----------------------------------------------------------------------------
     Check if the cold_restart has lake or glac. soil is required to be existed
@@ -1245,7 +1328,7 @@ int main(int argc, char *argv[]) {
           }
           mpp_def_global_att(fid, "history", history);
 
-          printf("***** LAND REMAP A fid = %d", fid);
+          printf("***** LAND REMAP A fid = %d\n", fid);
 
           mpp_end_def(fid);
 
@@ -1378,7 +1461,8 @@ int main(int argc, char *argv[]) {
       {
         int dim_time, dim_cohort_index, dim_lat, dim_lon;
         int dim_tile_index, dim_cohort, dim_tile, dim_z;
-	int dim_sc_cohort, dim_sc_cohort_index, dim_lc_cohort, dim_lc_cohort_index;
+        int dim_sc_cohort, dim_sc_cohort_index, dim_lc_cohort,
+            dim_lc_cohort_index;
 
         dim_lon = mpp_def_dim(fid_dst, LON_NAME, nx_dst);
         dim_lat = mpp_def_dim(fid_dst, LAT_NAME, ny_dst);
@@ -1390,15 +1474,14 @@ int main(int argc, char *argv[]) {
           dim_cohort = mpp_def_dim(fid_dst, COHORT_NAME, ncohort);
           dim_cohort_index =
               mpp_def_dim(fid_dst, COHORT_INDEX_NAME, max(nidx_dst_global, 1));
-	  
-	  dim_sc_cohort = mpp_def_dim(fid_dst, SC_COHORT_NAME, ncohort);
-          dim_sc_cohort_index =
-              mpp_def_dim(fid_dst, SC_COHORT_INDEX_NAME, max(nidx_dst_global, 1));
-	  	  
-	  dim_lc_cohort = mpp_def_dim(fid_dst, LC_COHORT_NAME, ncohort);
-          dim_lc_cohort_index =
-              mpp_def_dim(fid_dst, LC_COHORT_INDEX_NAME, max(nidx_dst_global, 1));
 
+          dim_sc_cohort = mpp_def_dim(fid_dst, SC_COHORT_NAME, ncohort);
+          dim_sc_cohort_index = mpp_def_dim(fid_dst, SC_COHORT_INDEX_NAME,
+                                            max(nidx_dst_global, 1));
+
+          dim_lc_cohort = mpp_def_dim(fid_dst, LC_COHORT_NAME, ncohort);
+          dim_lc_cohort_index = mpp_def_dim(fid_dst, LC_COHORT_INDEX_NAME,
+                                            max(nidx_dst_global, 1));
         }
         if (time_exist) dim_time = mpp_def_dim(fid_dst, timename, NC_UNLIMITED);
 
@@ -1410,12 +1493,13 @@ int main(int argc, char *argv[]) {
           vid1 = mpp_get_varid(fid_src[0], varname);
           ndim = mpp_get_var_ndim(fid_src[0], vid1);
 
-	  printf("***** LAND REMAP varname= %s vid1= %d ndim= %d\n",varname, vid1, ndim);
-
+          printf("***** LAND REMAP varname= %s vid1= %d ndim= %d\n", varname,
+                 vid1, ndim);
 
           for (m = 0; m < ndim; m++) {
             mpp_get_var_dimname(fid_src[0], vid1, m, dimname);
-	    printf("***** LAND REMAP dimm = %d vid1=%d dimname=%s\n",m, vid1,dimname);
+            printf("***** LAND REMAP dimm = %d vid1=%d dimname=%s\n", m, vid1,
+                   dimname);
 
             if (!strcmp(dimname, timename))
               dims[m] = dim_time;
@@ -1437,9 +1521,9 @@ int main(int argc, char *argv[]) {
               dims[m] = dim_sc_cohort;
             else if (!strcmp(dimname, LC_COHORT_NAME))
               dims[m] = dim_lc_cohort;
-	    else if (!strcmp(dimname, SC_COHORT_INDEX_NAME))
+            else if (!strcmp(dimname, SC_COHORT_INDEX_NAME))
               dims[m] = dim_sc_cohort_index;
-	    else if (!strcmp(dimname, LC_COHORT_INDEX_NAME))
+            else if (!strcmp(dimname, LC_COHORT_INDEX_NAME))
               dims[m] = dim_lc_cohort_index;
             else {
               // mpp_error("REMAP_LAND: invalid dimension name");
@@ -1544,8 +1628,8 @@ int main(int argc, char *argv[]) {
             mpp_put_var_value(fid_dst, vid_dst, cohort_data);
           else if (!strcmp(varname, TILE_INDEX_NAME) ||
                    !strcmp(varname, COHORT_INDEX_NAME) ||
-		   !strcmp(varname, SC_COHORT_INDEX_NAME) ||
-		   !strcmp(varname, LC_COHORT_INDEX_NAME) || ) {
+                   !strcmp(varname, SC_COHORT_INDEX_NAME) ||
+                   !strcmp(varname, LC_COHORT_INDEX_NAME)) {
             compress_int_data(ntile_dst, nxc_dst, nidx_dst, nidx_dst_global,
                               land_count_dst, idx_dst, idata_global,
                               use_all_tile);
