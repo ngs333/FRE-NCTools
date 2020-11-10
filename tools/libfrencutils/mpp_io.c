@@ -1373,8 +1373,11 @@ void mpp_end_def(int fid) {
   char errmsg[512];
   
   if( mpp_pe() != mpp_root_pe() ) return;
-  if(fid<0 || fid >=nfiles) mpp_error("mpp_io(mpp_end_def): invalid fid number, fid should be "
-				      "a nonnegative integer that less than nfiles");
+  if(fid<0 || fid >=nfiles){
+    printf("***** LAND REMAP fid = %d, nfiles=%d\n", fid, nfiles);
+    mpp_error("mpp_io(mpp_end_def): invalid fid number, fid should be "
+	      "a nonnegative integer that less than nfiles");
+  }
   if(HEADER_BUFFER_VALUE>0)
     status = nc__enddef(files[fid].ncid, HEADER_BUFFER_VALUE, 4, 0, 4);
   else
