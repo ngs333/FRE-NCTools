@@ -507,28 +507,32 @@ int main(int argc, char *argv[]) {
         mpp_get_var_dimname(fid_src[0], vid, m, varname);
         if (!strcmp(varname, timename)) has_taxis[l] = 1;
 
+	printf("RL varname=%s dim_name=%s l=%d vid=%d var_type=%d ndim_src=%d \n",
+            varnameB, varname, l, vid, var_type[l], ndim_src[l]);
+
         if (ndim_src[l] == 3 && !has_taxis[l]) {
           // mpp_error("remap_land: field must have time dimension when ndim = 3");
           printf("**RL ndim is %d and without time axis \n", ndim_src[l]);
         }
-        klev = -1;
-        if (ndim_src[l] == 3 && !has_taxis[l]) {
+        if (ndim_src[l] == 3){
           klev = 1;
-          // nz_src[l] = 0;  //? = 1 ?
-        } else if (ndim_src[l] == 3) {
-          klev = 1;
-        } else if (ndim_src[l] == 2 && !has_taxis[l]) {
-          klev = 0;
-        }
+	}else  if (ndim_src[l] == 2){
+	  klev = 0;
+        } else {
+          klev = -1;
+        } 
 
+	//Note klev may not exist for dim=2 if one of the dims is litterCCohort or soilCCohort
         if (klev >= 0) {
           mpp_get_var_dimname(fid_src[0], vid, klev, varname);
           if (strcmp(varname, LEVEL_NAME)){
-            printf("**RL  vertical dim is %s and it is not zfull \n", varname);
-            mpp_error( "remap_land: The vertical dimension name should be zfull, contact developer");
-          }
-           nz_src[l] = mpp_get_dimlen(fid_src[0], varname);
-           printf("**RL  nz_src[l]  = %d",  nz_src[l] );
+	    nz_src[l] = -1;
+            printf("**RL Verrtica dim (zfull) is not present with %s \n", varname);
+            //mpp_error( "remap_land: The vertical dimension name should be zfull, contact developer");
+          }else{
+	    nz_src[l] = mpp_get_dimlen(fid_src[0], varname);
+	    printf("**RL  nz_src[l] = %d\n",  nz_src[l] );
+	  }
         }
       }
     } else if (var_type[l] == MPP_CHAR) {
@@ -1566,6 +1570,7 @@ int main(int argc, char *argv[]) {
 
           if (!has_taxis[l] && t > 0) continue;
           mpp_get_varname(fid_src[0], l, varname);
+	  printf("*LR varname  = %s\n", varname); 
           if (nidx_dst_global == 0) {
             if (strcmp(varname, LON_NAME) && strcmp(varname, LAT_NAME) &&
                 strcmp(varname, LEVEL_NAME) && strcmp(varname, TILE_NAME) &&
@@ -1617,11 +1622,11 @@ int main(int argc, char *argv[]) {
 	        else if (!strcmp(varname, SC_COHORT_NAME)){
             //TODO: inst this data multi dim
             printf("RM : writing sc_cohort\n");
-	          mpp_put_var_value(fid_dst, vid_dst, sc_cohort_data);
+	    //mpp_put_var_value(fid_dst, vid_dst, sc_cohort_data);
 	        }
           else if (!strcmp(varname, LC_COHORT_NAME)){
             printf("RM : writing lc_cohort\n");
-            mpp_put_var_value(fid_dst, vid_dst, lc_cohort_data);
+	    // mpp_put_var_value(fid_dst, vid_dst, lc_cohort_data);
 	        }
           else if (!strcmp(varname, COHORT_NAME))
             mpp_put_var_value(fid_dst, vid_dst, cohort_data);
@@ -1664,6 +1669,7 @@ int main(int argc, char *argv[]) {
             mpp_put_var_value(fid_dst, vid_dst, idata_global);
 
           } else { /* other fields, read source data and do remapping */
+	    printf("*LR Other field varname=%s\n",varname);
             start_pos[0] = 0;
             for (m = 1; m < nface_src; m++) {
               start_pos[m] = start_pos[m - 1] + nidx_src[m - 1];
@@ -1683,15 +1689,22 @@ int main(int argc, char *argv[]) {
                 start[ndim_src[l] - 1] = 0;
                 nread[ndim_src[l] - 1] = nidx_src[m];
                 vid_src = mpp_get_varid(fid_src[m], varname);
-		//printf("****LR calling get vvb for varname=%s\n",varname);
-                if (var_type[l] == MPP_INT)
-                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
+		printf("*LR calling get vvb for varname=%s vid_src=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+		       varname, vid_src, var_type[l],k,nz_src[k], start[0], nread[ndim_src[l] - 1]);
+                if (var_type[l] == MPP_INT){
+                  mpp_get_var_value_block(fid_src[m], vid_src,  start, nread,
                                           idata_src + pos);
-                else
-                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
+		}else if (var_type[l] == MPP_DOUBLE){
+		    mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
                                           data_src + pos);
-		//printf("****LR done call get vvb for varname=%s\n",varname);
-                pos += nidx_src[m];
+		}
+		else{
+		  mpp_error("**RM: TODO vartype other than INT or DOUBLE");
+		}
+
+		printf("*LR Finished vvb for varname=%s vid_src=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+		       varname, vid_src, var_type[l],k,nz_src[k], start[0], nread[ndim_src[l] - 1]);
+		
               }
               for (m = 0; m < 4; m++) {
                 start[m] = 0;
