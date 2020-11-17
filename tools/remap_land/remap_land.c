@@ -1669,7 +1669,7 @@ int main(int argc, char *argv[]) {
             mpp_put_var_value(fid_dst, vid_dst, idata_global);
 
           } else { /* other fields, read source data and do remapping */
-	    printf("*LR Other field varname=%s\n",varname);
+	          printf("*LR Other field varname=%s\n",varname);
             start_pos[0] = 0;
             for (m = 1; m < nface_src; m++) {
               start_pos[m] = start_pos[m - 1] + nidx_src[m - 1];
@@ -1689,22 +1689,22 @@ int main(int argc, char *argv[]) {
                 start[ndim_src[l] - 1] = 0;
                 nread[ndim_src[l] - 1] = nidx_src[m];
                 vid_src = mpp_get_varid(fid_src[m], varname);
-		printf("*LR calling get vvb for varname=%s vid_src=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
-		       varname, vid_src, var_type[l],k,nz_src[k], start[0], nread[ndim_src[l] - 1]);
-                if (var_type[l] == MPP_INT){
-                  mpp_get_var_value_block(fid_src[m], vid_src,  start, nread,
+                printf("*LR C VBB  for varname=%s vid%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+                    varname, vid_src, var_type[l], k, nz_src[k], start[0], nread[ndim_src[l] - 1]);
+                if (var_type[l] == MPP_INT) {
+                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
                                           idata_src + pos);
-		}else if (var_type[l] == MPP_DOUBLE){
-		    mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
+                } else if (var_type[l] == MPP_DOUBLE) {
+                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
                                           data_src + pos);
-		}
-		else{
-		  mpp_error("**RM: TODO vartype other than INT or DOUBLE");
-		}
+                } else {
+                  mpp_error("**RM: TODO vartype other than INT or DOUBLE");
+                }
+                
+                printf("*LR E VBB for varname=%s vid=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+                    varname, vid_src, var_type[l], k, nz_src[k], start[0],nread[ndim_src[l] - 1]);
 
-		printf("*LR Finished vvb for varname=%s vid_src=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
-		       varname, vid_src, var_type[l],k,nz_src[k], start[0], nread[ndim_src[l] - 1]);
-		
+                pos += nidx_src[m];
               }
               for (m = 0; m < 4; m++) {
                 start[m] = 0;
