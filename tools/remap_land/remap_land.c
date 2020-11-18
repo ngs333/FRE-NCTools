@@ -183,6 +183,7 @@ int main(int argc, char *argv[]) {
   double *x_src = NULL, *y_src = NULL;
   int time_exist, zaxis_exist, ntime, l;
   int *has_taxis = NULL, *var_type = NULL, *ndim_src = NULL, *nz_src = NULL;
+  int * kz_src = NULL;
   double *time_data = NULL;
   int has_glac = 0, has_lake = 0;
   int src_has_tile = 0, cold_has_tile = 0;
@@ -476,82 +477,89 @@ int main(int argc, char *argv[]) {
   }
 
   /*-----------------------------------------------------------------------------
-    loop through each variable of the source data to see get dimension of each
-    variable
+    loop through each variable of the source data to see get dimension of each variable
     ----------------------------------------------------------------------------*/
   nvar_src = mpp_get_nvars(fid_src[0]);
   has_taxis = (int *)malloc(nvar_src * sizeof(int));
   ndim_src = (int *)malloc(nvar_src * sizeof(int));
   nz_src = (int *)malloc(nvar_src * sizeof(int));
+  kz_src = (int *)malloc(nvar_src * sizeof(int));
   var_type = (int *)malloc(nvar_src * sizeof(int));
 
   printf( "\n**RL timename=%s \n",timename);
 
   for (l = 0; l < nvar_src; l++) {
     char varname[256];
-    char varnameB[256];
+    char vdname[256]; //var dimname
     int vid, m, klev;
 
     has_taxis[l] = 0;
     nz_src[l] = 1;
+    kz_src[l] = 0;
     mpp_get_varname(fid_src[0], l, varname);
-    mpp_get_varname(fid_src[0], l, varnameB);
     vid = mpp_get_varid(fid_src[0], varname);
     var_type[l] = mpp_get_var_type(fid_src[0], vid);
     ndim_src[l] = mpp_get_var_ndim(fid_src[0], vid);
 
     if (var_type[l] == MPP_INT || var_type[l] == MPP_DOUBLE) {
-      if (ndim_src[l] > 3)
-        mpp_error( "remap_land: number of dimensions for the field in src_restart is greater than 3");
-      for (m = 0; m < ndim_src[l]; m++) {
-        mpp_get_var_dimname(fid_src[0], vid, m, varname);
-        if (!strcmp(varname, timename)) has_taxis[l] = 1;
-
-	printf("RL varname=%s dim_name=%s l=%d vid=%d var_type=%d ndim_src=%d \n",
-            varnameB, varname, l, vid, var_type[l], ndim_src[l]);
-
-        if (ndim_src[l] == 3 && !has_taxis[l]) {
-          // mpp_error("remap_land: field must have time dimension when ndim = 3");
-          printf("**RL ndim is %d and without time axis \n", ndim_src[l]);
-        }
-        if (ndim_src[l] == 3){
-          klev = 1;
-	}else  if (ndim_src[l] == 2){
-	  klev = 0;
-        } else {
-          klev = -1;
-        } 
-
-	//Note klev may not exist for dim=2 if one of the dims is litterCCohort or soilCCohort
-        if (klev >= 0) {
-          mpp_get_var_dimname(fid_src[0], vid, klev, varname);
-          if (strcmp(varname, LEVEL_NAME)){
-	    nz_src[l] = -1;
-            printf("**RL Verrtica dim (zfull) is not present with %s \n", varname);
-            //mpp_error( "remap_land: The vertical dimension name should be zfull, contact developer");
-          }else{
-	    nz_src[l] = mpp_get_dimlen(fid_src[0], varname);
-	    printf("**RL  nz_src[l] = %d\n",  nz_src[l] );
-	  }
-        }
+      if (ndim_src[l] > 3){
+        mpp_error( "remap_land: number of dimensions for the field in src_restart is "
+            "greater than 3");
       }
+       nz_src[l] = -1;
+      for (m = 0; m < ndim_src[l]; m++) {
+        mpp_get_var_dimname(fid_src[0], vid, m, vdname);
+        if (!strcmp(vdname, timename)) has_taxis[l] = 1;
+        if (!strcmp(vdname, LEVEL_NAME)) {
+            kz_src[l] = m;
+            nz_src[l] = mpp_get_dimlen(fid_src[0], vdname);
+            nz_src[l] = m;
+        }
+        printf("RL vname=%s dname=%s l=%d vid=%d vtype=%d ndim=%d taxis=%d\n kz =%d nz=%d",
+             varname, vdname, l, vid, var_type[l], ndim_src[l], has_taxis[l],kz_src[l], nz_src[l]);
+      }
+      if( nz_src[l] == -1){
+        printf("**RL Vertical dim (zfull) is not present with %s \n", varname);
+        //TODO:
+        //mpp_error("remap_land: The vertical dimension name should be zfull");
+      }
+      
+      if (ndim_src[l] == 3 && !has_taxis[l]) {
+        //mpp_error("remap_land: field must have time dimension when ndim = 3");
+        printf("**RL ndim is %d and without time axis \n", ndim_src[l]);
+      }
+      // TODO: need better convention for position on zfull (e.g. first, 2nd)  
+      // Note klev may n/ot exist for dim=2 if one of the dims is litterCCohort
+      // or soilCCohort
+      /*
+      if (ndim_src[l] == 3) {
+        klev = 1;
+        kz_src[l] = 1;
+      } else if (ndim_src[l] == 2) {
+        klev = 0;
+        kz_src[l] = 0;
+      } else {
+        kz_src[l] = -1;
+      }
+      */
     } else if (var_type[l] == MPP_CHAR) {
       for (m = 0; m < ndim_src[l]; m++) {
-        mpp_get_var_dimname(fid_src[0], vid, m, varname);
-        if (!strcmp(varname, timename)) {
-          has_taxis[l] = 1;
-          mpp_error("remap_land: char varname has time axis");
+        mpp_get_var_dimname(fid_src[0], vid, m, vdname);
+        if (!strcmp(vdname, timename)) has_taxis[l] = 1;
+        if (!strcmp(vdname, LEVEL_NAME)) {
+          kz_src[l] = m;
+          nz_src[l] = mpp_get_dimlen(fid_src[0], vdname);
+          nz_src[l] = m;
         }
-
-        printf("RL char varname=%s dim_name=%s l=%d vid=%d var_type=%d ndim_src=%d \n",
-            varnameB, varname, l, vid, var_type[l], ndim_src[l]);
-
-        // TODO: Check on vertical dim.
+        printf("RL CHAR vname=%s dname=%s l=%d vid=%d vtype=%d ndim=%d taxis=%d\n kz =%d nz=%d",
+             varname, vdname, l, vid, var_type[l], ndim_src[l], has_taxis[l],kz_src[l], nz_src[l]);
+        mpp_error("remap_land: char varname has time axis");
       }
-    } else {
+    }else {
       mpp_error("remap_land: field type must be MPP_INT or MPP_DOUBLE or MPP_CHAR");
     }
   }
+
   /*------------------------------------------------------------------------------
     get the cohort data, currently it only contains in vegn data
     -----------------------------------------------------------------------------*/
@@ -1685,7 +1693,7 @@ int main(int argc, char *argv[]) {
                   start[0] = t;
                   kid = 1;
                 }
-                start[kid] = k;
+                start[kid] = kz_src[l];
                 start[ndim_src[l] - 1] = 0;
                 nread[ndim_src[l] - 1] = nidx_src[m];
                 vid_src = mpp_get_varid(fid_src[m], varname);
