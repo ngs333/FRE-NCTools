@@ -513,7 +513,6 @@ int main(int argc, char *argv[]) {
         if (!strcmp(vdname, LEVEL_NAME)) {
             kz_src[l] = m;
             nz_src[l] = mpp_get_dimlen(fid_src[0], vdname);
-            nz_src[l] = m;
         }
         printf("RL vname=%s dname=%s l=%d vid=%d vtype=%d ndim=%d taxis=%d\n kz =%d nz=%d",
              varname, vdname, l, vid, var_type[l], ndim_src[l], has_taxis[l],kz_src[l], nz_src[l]);
@@ -549,11 +548,12 @@ int main(int argc, char *argv[]) {
         if (!strcmp(vdname, LEVEL_NAME)) {
           kz_src[l] = m;
           nz_src[l] = mpp_get_dimlen(fid_src[0], vdname);
-          nz_src[l] = m;
         }
         printf("RL CHAR vname=%s dname=%s l=%d vid=%d vtype=%d ndim=%d taxis=%d\n kz =%d nz=%d",
              varname, vdname, l, vid, var_type[l], ndim_src[l], has_taxis[l],kz_src[l], nz_src[l]);
-        mpp_error("remap_land: char varname has time axis");
+        if(has_taxis[l] == 1){
+         mpp_error("remap_land: char varname has time axis");
+        }
       }
     }else {
       mpp_error("remap_land: field type must be MPP_INT or MPP_DOUBLE or MPP_CHAR");
@@ -986,6 +986,7 @@ int main(int argc, char *argv[]) {
   {
     double *data_dst = NULL, *data_src = NULL;
     int *idata_dst = NULL, *idata_src = NULL;
+    char *cdata_dst=NULL, *cdata_src=NULL;
     int *start_pos = NULL;
     double *x_tmp = NULL, *y_tmp = NULL;
     double *lon_axis_dst = NULL, *lat_axis_dst = NULL;
@@ -1029,6 +1030,7 @@ int main(int argc, char *argv[]) {
 
     idata_src = (int *)malloc(nidx_tot_src * sizeof(int));
     data_src = (double *)malloc(nidx_tot_src * sizeof(double));
+    cdata_src = (int *)malloc(nidx_tot_src * sizeof(char));
 
     /* setup domain */
     layout[0] = npes;
@@ -1094,6 +1096,7 @@ int main(int argc, char *argv[]) {
 
       double *rdata_global = NULL;
       int *idata_global = NULL;
+      char *cdata_global = NULL;
 
       size_t start[4], nread[4], nwrite[4];
       char land_cold[512], file_dst[512], file_cold[512];
@@ -1568,8 +1571,9 @@ int main(int argc, char *argv[]) {
 
       rdata_global = (double *)malloc(nidx_dst_global * sizeof(double));
       idata_global = (int *)malloc(nidx_dst_global * sizeof(int));
+      cdata_global = (char *)malloc(nidx_dst_global * sizeof(char));
 
-      printf("*LR ntime  = %d\n", ntime); 
+      printf("*LR writing ntime  = %d\n", ntime); 
       /* loop through each time level */
       for (t = 0; t < ntime; t++) {
         for (l = 0; l < nvar_src; l++) {
@@ -1578,7 +1582,7 @@ int main(int argc, char *argv[]) {
 
           if (!has_taxis[l] && t > 0) continue;
           mpp_get_varname(fid_src[0], l, varname);
-	  printf("*LR varname  = %s\n", varname); 
+	        printf("*LR writing varname  = %s\n", varname); 
           if (nidx_dst_global == 0) {
             if (strcmp(varname, LON_NAME) && strcmp(varname, LAT_NAME) &&
                 strcmp(varname, LEVEL_NAME) && strcmp(varname, TILE_NAME) &&
@@ -1677,7 +1681,7 @@ int main(int argc, char *argv[]) {
             mpp_put_var_value(fid_dst, vid_dst, idata_global);
 
           } else { /* other fields, read source data and do remapping */
-	          printf("*LR Other field varname=%s\n",varname);
+	          printf("*RL Other field varname=%s\n",varname);
             start_pos[0] = 0;
             for (m = 1; m < nface_src; m++) {
               start_pos[m] = start_pos[m - 1] + nidx_src[m - 1];
@@ -1697,19 +1701,22 @@ int main(int argc, char *argv[]) {
                 start[ndim_src[l] - 1] = 0;
                 nread[ndim_src[l] - 1] = nidx_src[m];
                 vid_src = mpp_get_varid(fid_src[m], varname);
-                printf("*LR C VBB  for varname=%s vid%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+                printf("*RL C VBB  for varname=%s vid%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
                     varname, vid_src, var_type[l], k, nz_src[k], start[0], nread[ndim_src[l] - 1]);
                 if (var_type[l] == MPP_INT) {
-                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
-                                          idata_src + pos);
+                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread, idata_src + pos);
                 } else if (var_type[l] == MPP_DOUBLE) {
-                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread,
-                                          data_src + pos);
-                } else {
-                  mpp_error("**RM: TODO vartype other than INT or DOUBLE");
+                  mpp_get_var_value_block(fid_src[m], vid_src, start, nread, data_src + pos);
+                } else if (var_type[l] == MPP_CHAR) {
+                   mpp_get_var_value_block(fid_src[m], vid_src, start, nread, cdata_src + pos);
+                  printf("*RL R strlen=%lu sizeof%lu \n chars=%s\n",strlen(cdata_src), sizeof(cdata_src), cdata_src);
+                   //printf("*RL chars=%s\n\n",cdata_src);
+                  //mpp_error("**RL: TODO vartype  CHAR");
+                }else{
+                  mpp_error("**RM: TODO vartype other than INT or DOUBLE or CHAR");
                 }
                 
-                printf("*LR E VBB for varname=%s vid=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
+                printf("*RL E VBB for varname=%s vid=%d vartype=%d k=%d nz_src[k]=%d start=%d, nread=%d\n",
                     varname, vid_src, var_type[l], k, nz_src[k], start[0],nread[ndim_src[l] - 1]);
 
                 pos += nidx_src[m];
@@ -1740,11 +1747,10 @@ int main(int argc, char *argv[]) {
                   idata_dst[m] = idata_src[lll];
                 }
                 compress_int_data(ntile_dst, nxc_dst, nidx_dst, nidx_dst_global,
-                                  land_count_dst, idata_dst, idata_global,
-                                  use_all_tile);
+                        land_count_dst, idata_dst, idata_global,use_all_tile);
                 mpp_put_var_value_block(fid_dst, vid_dst, start, nwrite,
                                         idata_global);
-              } else {
+              } else if (var_type[l] == MPP_DOUBLE) {
                 for (m = 0; m < ntile_dst * nxc_dst; m++) {
                   int face, lll;
                   if (land_idx_map[m] < 0) {
@@ -1755,13 +1761,34 @@ int main(int argc, char *argv[]) {
                   lll = start_pos[face] + land_idx_map[m];
                   data_dst[m] = data_src[lll];
                 }
-                compress_double_data(ntile_dst, nxc_dst, nidx_dst,
-                                     nidx_dst_global, land_count_dst, data_dst,
-                                     rdata_global, use_all_tile);
+                compress_double_data(ntile_dst, nxc_dst, nidx_dst, nidx_dst_global,
+                      land_count_dst, data_dst,rdata_global, use_all_tile);
                 mpp_put_var_value_block(fid_dst, vid_dst, start, nwrite,
                                         rdata_global);
+              } 
+              if (var_type[l] == MPP_CHAR) {
+                /*
+                for (m = 0; m < ntile_dst * nxc_dst; m++) {
+                  int face, lll;
+                  if (land_idx_map[m] < 0) {
+                    //TODO:
+                    cdata_dst[m] = ' ';
+                    continue;
+                  }
+                  face = land_face_map[m];
+                  lll = start_pos[face] + land_idx_map[m];
+                  cdata_dst[m] = cdata_src[lll];
+                }*/
+                //compress_char_data(ntile_dst, nxc_dst, nidx_dst, nidx_dst_global,
+                //land_count_dst, cdata_dst, cdata_global,use_all_tile);
+                // Data from:: mpp_get_var_value_block(fid_src[m], vid_src, start, nread, cdata_src + pos);
+                //mpp_put_var_value_block(fid_dst, vid_dst, start, nwrite, cdata_global);
+                printf("*RL W strlen=%lu sizeof%lu \n chars=%s\n",strlen(cdata_src), sizeof(cdata_src), cdata_src);
+                mpp_put_var_value_block(fid_dst, vid_dst, 0, sizeof(cdata_src) -1 , cdata_global);
+              }else {
+                mpp_error("**RL: Not pupported vartype other than INT or DOUBLE or CHAR");
               }
-            }
+              }
           }
         }
 
