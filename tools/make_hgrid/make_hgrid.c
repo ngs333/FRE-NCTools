@@ -971,8 +971,8 @@ int main(int argc, char* argv[])
     fprintf(stderr,"[INFO] make_hgrid.c Number of global tiles (ntiles_global): %d\n", ntiles_global); 
   }
 
-  nxl = (int *)malloc(ntiles*sizeof(int));
-  nyl = (int *)malloc(ntiles*sizeof(int));
+  nxl = (int *)malloc((ntiles + nest_grids)*sizeof(int));
+  nyl = (int *)malloc((ntiles + nest_grids)*sizeof(int));
   
   /* get super grid size */
   if(use_legacy) {
@@ -1001,7 +1001,7 @@ int main(int argc, char* argv[])
 	}
       }
 
-      for (n=ntiles_global; n < ntiles; n++){
+      for (n=ntiles_global; n < ntiles_global + nest_grids; n++){
 	nn = n - ntiles_global;
 	
 	nxl[n] = (iend_nest[nn]-istart_nest[nn]+1)*refine_ratio[nn];
