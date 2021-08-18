@@ -19,9 +19,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Update_submodule
-    - run: |
-          git submodule update --init --recursive
+    - name: Checkout submodules
+      uses: srt32/git-actions@v0.0.3
+      with:
+        args: git submodule update --init --recursive
     - name: Configure
       run: |
         autoreconf -i configure.ac
