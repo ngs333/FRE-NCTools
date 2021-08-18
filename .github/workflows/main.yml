@@ -20,7 +20,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Update_submodule
-      run:  git submodule update --init --recursive
+    - run: |
+          git submodule update --init --recursive
     - name: Configure
       run: |
         autoreconf -i configure.ac
