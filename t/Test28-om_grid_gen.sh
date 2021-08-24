@@ -31,11 +31,20 @@ fi
 
 cd Test28
 
-run command ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
 
-run command ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
 
-run command ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
+oggappd=$top_srcdir/tools/ocean_model_grid_generator/
+
+cp $oggappd/ocean_grid_generator.py .
+cp $oggappd/numpypi/numpypi_series.py .
+cp $oggappd/numpypi/ignore_this.py .
+
+
+run command ./ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
+
+run command ./ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
+
+run command ./ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
 
 #Fourth test is yielding incorrect sum with gcc+Python3
 #run command ocean_grid_generator.py -f ocean_hgrid_res0.5_equenh.nc -r 2 --south_cutoff_row 130
