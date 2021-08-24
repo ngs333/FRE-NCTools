@@ -33,9 +33,9 @@ cd Test28
 
 
 
-oggappd=$top_srcdir/tools/ocean_model_grid_generator/
+oggappd=$top_srcdir/tools/ocean_model_grid_generator
 
-cp $oggappd/ocean_grid_generator.py .
+cp -p $oggappd/ocean_grid_generator.py .
 cp $oggappd/numpypi/numpypi_series.py .
 cp $oggappd/numpypi/ignore_this.py .
 
