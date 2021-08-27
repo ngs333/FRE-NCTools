@@ -22,9 +22,9 @@
 
 # Test grid for multiple same level and telescoping nests 
 
-@test "Check ocean_grid_generator.py exists" {
+@test "Test the ocean_model_grid_generator subproject python app" {
 
-  if [ ! -d "Test28" ] 
+    if [ ! -d "Test28" ] 
   then
     mkdir Test28
   fi
@@ -42,38 +42,36 @@
   run command -v  ./ocean_grid_generator.py
   [ "$status" -eq 0 ]
 
-}
-
-@test "Check numpypi_series.py  exists" {
-  cd Test28
   run command -v  ./numpypi_series.py
   [ "$status" -eq 0 ]
-}
 
-@test "Check ignore_this.py exists" {
-  cd Test28
   run command -v ./ignore_this.py
   [ "$status" -eq 0 ]
-}
 
-@test "Test the ocean_model_grid_generator subproject python app" {
+  run command python ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
 
-  cd Test28
+  run command -v  ocean_hgrid_res4.0.nc
+  [ "$status" -eq 0 ]
 
-run command ./ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
+  run command -v  ./ocean_hgrid_res4.0.nc
+  [ "$status" -eq 0 ]
 
-run command ./ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
+  run command python ./ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
+  run command -v  ./ocean_hgrid_res1.0.nc
+  [ "$status" -eq 0 ]
 
-run command ./ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
+  run command ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
+  run command -v  ./ocean_hgrid_res0.5.nc
+  [ "$status" -eq 0 ]
 
 #Fourth test is yielding incorrect sum with gcc+Python3
 #run command ocean_grid_generator.py -f ocean_hgrid_res0.5_equenh.nc -r 2 --south_cutoff_row 130
 
-head -3 $top_srcdir/t/Test28-input/hash.md5 > hash.quick
+  head -3 $top_srcdir/t/Test28-input/hash.md5 > hash.quick
 
-md5sum -c hash.quick
+  md5sum -c hash.quick
 
-[ "$status" -eq 0 ]
+  [ "$status" -eq 0 ]
 
   cd ..
   rm -rf Test28
