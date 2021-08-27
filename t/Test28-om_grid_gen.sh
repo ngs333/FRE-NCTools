@@ -22,7 +22,7 @@
 
 # Test grid for multiple same level and telescoping nests 
 
-@test "Check ocean_grid_generator.py exists and is executable" {
+@test "Check ocean_grid_generator.py exists" {
 
   if [ ! -d "Test28" ] 
   then
@@ -41,8 +41,7 @@
 
   run command -v  ./ocean_grid_generator.py
   [ "$status" -eq 0 ]
-  run  command ./ocean_grid_generator.py -h
-  [ "$status" -eq 0 ]
+
 }
 
 @test "Check numpypi_series.py  exists" {
