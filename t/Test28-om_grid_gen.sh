@@ -48,10 +48,10 @@
   run command -v ./ignore_this.py
   [ "$status" -eq 0 ]
 
-  run command python ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
+  run command python3 ./ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
 
-  run command -v  ocean_hgrid_res4.0.nc
-  [ "$status" -eq 0 ]
+  #run command -v  ocean_hgrid_res4.0.nc
+  #[ "$status" -eq 0 ]
 
   run command -v  ./ocean_hgrid_res4.0.nc
   [ "$status" -eq 0 ]
