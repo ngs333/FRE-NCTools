@@ -22,23 +22,44 @@
 
 # Test grid for multiple same level and telescoping nests 
 
+@test "Check ocean_grid_generator.py exists and is executable" {
+
+  if [ ! -d "Test28" ] 
+  then
+    mkdir Test28
+  fi
+  
+  cd Test28
+  
+  oggappd=$top_srcdir/tools/ocean_model_grid_generator
+  
+  cp -p $oggappd/ocean_grid_generator.py .
+  cp -p $oggappd/numpypi/numpypi_series.py .
+  cp -p $oggappd/numpypi/ignore_this.py .
+
+  chmod ugo+x *.py
+
+  run command -v  ./ocean_grid_generator.py
+  [ "$status" -eq 0 ]
+  run  command ./ocean_grid_generator.py -h
+  [ "$status" -eq 0 ]
+}
+
+@test "Check numpypi_series.py  exists" {
+  cd Test28
+  run command -v  ./numpypi_series.py
+  [ "$status" -eq 0 ]
+}
+
+@test "Check ignore_this.py exists" {
+  cd Test28
+  run command -v ./ignore_this.py
+  [ "$status" -eq 0 ]
+}
+
 @test "Test the ocean_model_grid_generator subproject python app" {
 
-if [ ! -d "Test28" ] 
-then
-  mkdir Test28
-fi
-
-cd Test28
-
-
-
-oggappd=$top_srcdir/tools/ocean_model_grid_generator
-
-cp -p $oggappd/ocean_grid_generator.py .
-cp $oggappd/numpypi/numpypi_series.py .
-cp $oggappd/numpypi/ignore_this.py .
-
+  cd Test28
 
 run command ./ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
 
