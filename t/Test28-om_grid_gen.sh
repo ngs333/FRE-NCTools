@@ -55,14 +55,18 @@
 
   [ -e ocean_hgrid_res4.0.nc ]
 
-#  run command python ./ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
+  run python3 ./ocean_grid_generator.py -f ocean_hgrid_res1.0.nc -r 1.0  --south_cutoff_row 2 --no_changing_meta
 
-#  run command ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
+  [ -e ocean_hgrid_res1.0.nc ]
 
-#Fourth test is yielding incorrect sum with gcc+Python3
+  run python3 ./ocean_grid_generator.py -f ocean_hgrid_res0.5.nc -r 2  --no_changing_meta
+
+  [ -e ocean_hgrid_res0.5.nc ]
+
+#Fourth test is yielding incorrect hashcheck sum with gcc+Python3
 #run command ocean_grid_generator.py -f ocean_hgrid_res0.5_equenh.nc -r 2 --south_cutoff_row 130
 
-  head -1 $top_srcdir/t/Test28-input/hash.md5 > hash.quick
+  head -3 $top_srcdir/t/Test28-input/hash.md5 > hash.quick
 
   md5sum -c hash.quick
 
