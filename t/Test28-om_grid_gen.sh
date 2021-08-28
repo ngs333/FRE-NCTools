@@ -48,6 +48,9 @@
   run command -v ignore_this.py
   [ "$status" -eq 0 ]
 
+  run command -v python3
+  [ "$status" -eq 0 ]
+  
   run ./ocean_grid_generator.py -f ocean_hgrid_res4.0.nc -r 0.25 --even_j --no_changing_meta
 
   run ls ocean_hgrid_res4.0.nc 
