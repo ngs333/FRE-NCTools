@@ -39,7 +39,7 @@
 
   chmod ugo+x *.py
 
-  run command -v  ocean_grid_generator.py
+  run command -v  ./ocean_grid_generator.py
   [ "$status" -eq 0 ]
 
   run command -v  numpypi_series.py
