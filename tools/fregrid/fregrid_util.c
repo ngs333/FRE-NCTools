@@ -944,7 +944,8 @@ void get_input_metadata(int ntiles, int nfiles, File_config *file1, File_config 
             if (xcart == 'X' && ycart == 'Y'){
               field[n].var[ll].do_regrid = 1;
             }else{
-              printf("fregrid_util: Field %s will not be remapped for not depending on  X and/or Y coordinate.",field[n].var[ll].name);
+              printf("fregrid_util: Field %s will not be remapped as its independent of X,Y coordinates, for file :\n  %s\n",
+		     field[n].var[ll].name, file[n].name);
             }
           }
         }
