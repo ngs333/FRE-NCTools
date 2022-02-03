@@ -1,0 +1,73 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "(gdb) Launch mppnccombine",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/postprocessing/mppnccombine/mppnccombine",
+        "args": ["-vv", "output.nc", "data.nc.0000", "data.nc.0001", "data.nc.0002",
+           "data.nc.0003", "data.nc.0004", "data.nc.0005", "data.nc.0006", "data.nc.0007",
+          "data.nc.0008", "data.nc.0009", "data.nc.0010", "data.nc.0011",
+          "data.nc.0012", "data.nc.0013", "data.nc.0014", "data.nc.0015"],
+        "stopAtEntry": false,
+        "cwd": "/home/mzuniga/fre_combi/test",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ],
+        "preLaunchTask": "make"
+      },
+      {
+        "name": "(gdb) Launch make_coupler_mosaic",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/tools/make_coupler_mosaic/make_coupler_mosaic",
+        "args": ["--atmos_mosaic", "C48_mosaic.nc", "--ocean_mosaic", "ocean_mosaic.nc", "--ocean_topog", "topog.nc",
+        "--check", "--area_ratio_thresh", "1.e-10", "--mosaic_name", "grid_spec"],
+        "stopAtEntry": false,
+        "cwd": "/home/mzuniga/fre_polyarea/tests/test_xg",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ],
+        "preLaunchTask": "make"
+      },
+    {
+      "name": "(gdb) Launch fregrid",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/tools/fregrid/fregrid",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}/build/tools/fregrid",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          }
+      ],
+      "preLaunchTask": "make"
+    }
+    ]
+}
+//"cwd": "${workspaceFolder}/build/postprocessing/mppnccombine"

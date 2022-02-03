@@ -61,6 +61,7 @@ void latlon2xyz(int size, const double *lon, const double *lat, double *x, doubl
 void xyz2latlon(int size, const double *x, const double *y, const double *z, double *lon, double *lat);
 double box_area(double ll_lon, double ll_lat, double ur_lon, double ur_lat);
 double poly_area(const double lon[], const double lat[], int n);
+double poly_area_original(const double lon[], const double lat[], int n );
 double poly_area_dimensionless(const double lon[], const double lat[], int n);
 double poly_area_no_adjust(const double x[], const double y[], int n);
 int fix_lon(double lon[], double lat[], int n, double tlon);
@@ -114,12 +115,13 @@ void setCoordinate(struct Node *node, double x, double y, double z);
 void setInbound(struct Node *interList, struct Node *list);
 int isInside(struct Node *node);
 int areApproxEqual(double a, double b, double delta);
+int areApproxEqualPct(double a, double b, double pct);
 int at_pole(const double x[], const double y[], int n);
 double se_area(const double x[], const double y[], const int n);
 void rotate_point_ra( double rv[]);
-double rotate_poly(const double x[], const double y[], const int n, 
+double rotate_poly(const double x[], const double y[], const int n,
   double xr[], double yr[]);
-int lon_fix_pas(double *x, double *y, int n_in, double tlon, PolyAreaStrategy pas); 
+int lon_fix_pas(double *x, double *y, int n_in, double tlon, PolyAreaStrategy pas);
 void get_rotation_matrix(double m[3][3]);
 void set_reproduce_siena_true(void);
 
