@@ -173,7 +173,7 @@ void get_file_dir_and_name(char* file, char* filedir, char* filename)
     strcpy(filename, fptr);
     strncpy(filedir, file, siz);
   }
-};
+}
 
 
 void get_global_grid(const char* grid_file, int nx, int ny, int x_refine, int y_refine, double* x, double* y)
@@ -257,8 +257,7 @@ void get_grid_global_area(int nx, int ny, const double* x, const double* y, doub
 {
   double* x_local, * y_local, * area_local;
   int nxc, nyc, isc, iec, jsc, jec;
-  int isc2, iec2, jsc2, jec2;
-  int nxc2, nyc2, layout[2];
+  int  layout[2];
   int i, j;
   domain2D Dom;
 
@@ -516,14 +515,14 @@ int main(int argc, char* argv[])
    * Read atmosphere grid
    */
   {
-    int n, m_fid, g_fid, vid, gid, tid;
-    int ncontacts, nnest;
+    int m_fid, g_fid, vid, gid, tid;
+    int ncontacts;
     int* tile1 = NULL, * istart1 = NULL, * iend1 = NULL, * jstart1 = NULL, * jend1 = NULL;
     int* tile2 = NULL, * istart2 = NULL, * iend2 = NULL, * jstart2 = NULL, * jend2 = NULL;
     size_t start[4], nread[4];
     char dir[STRING], filename[STRING], file[2 * STRING];
 
-    for (n = 0; n < 4; n++) {
+    for (int n = 0; n < 4; n++) {
       start[n] = 0;
       nread[n] = 1;
     }
@@ -543,8 +542,8 @@ int main(int argc, char* argv[])
     get_file_path(amosaic, dir);
     gid = mpp_get_varid(m_fid, "gridfiles");
     tid = mpp_get_varid(m_fid, "gridtiles");
-    for (n = 0; n < ntile_atm; n++) {
-      int i, j;
+    for (int n = 0; n < ntile_atm; n++) {
+      int i;
 
       start[0] = n; start[1] = 0; nread[0] = 1; nread[1] = STRING;
       mpp_get_var_value_block(m_fid, gid, start, nread, filename);
@@ -601,7 +600,7 @@ int main(int argc, char* argv[])
       cart_xatm = (double**)malloc(ntile_atm * sizeof(double*));
       cart_yatm = (double**)malloc(ntile_atm * sizeof(double*));
       cart_zatm = (double**)malloc(ntile_atm * sizeof(double*));
-      for (n = 0; n < ntile_atm; n++) {
+      for (int n = 0; n < ntile_atm; n++) {
         cart_xatm[n] = (double*)malloc((nxa[n] + 1) * (nya[n] + 1) * sizeof(double));
         cart_yatm[n] = (double*)malloc((nxa[n] + 1) * (nya[n] + 1) * sizeof(double));
         cart_zatm[n] = (double*)malloc((nxa[n] + 1) * (nya[n] + 1) * sizeof(double));
@@ -610,7 +609,7 @@ int main(int argc, char* argv[])
       }
     }
     else {
-      for (n = 0; n < ntile_atm; n++) {
+      for (int n = 0; n < ntile_atm; n++) {
         int i, j;
         //Calculate the ATM grid cell area (not read from grid files)
         get_grid_global_area(nxa[n], nya[n], xatm[n], yatm[n], area_atm[n]);
@@ -638,7 +637,7 @@ int main(int argc, char* argv[])
       jstart2 = (int*)malloc(ncontacts * sizeof(int));
       jend2 = (int*)malloc(ncontacts * sizeof(int));
       read_mosaic_contact(amosaic, tile1, tile2, istart1, iend1, jstart1, jend1, istart2, iend2, jstart2, jend2);
-      nnest = get_nest_contact(nxa, nya, ncontacts, tile1, tile2, istart1, iend1, jstart1, jend1,
+      int nnest = get_nest_contact(nxa, nya, ncontacts, tile1, tile2, istart1, iend1, jstart1, jend1,
         istart2, iend2, jstart2, jend2, &tile_nest, &tile_parent, &is_nest, &ie_nest,
         &js_nest, &je_nest, &is_parent, &ie_parent, &js_parent, &je_parent);
       free(tile1);
@@ -663,7 +662,7 @@ int main(int argc, char* argv[])
     size_t start[4], nread[4];
     char dir[STRING], filename[STRING], file[2 * STRING];
 
-    for (n = 0; n < 4; n++) {
+    for (int n = 0; n < 4; n++) {
       start[n] = 0;
       nread[n] = 1;
     }
@@ -681,9 +680,7 @@ int main(int argc, char* argv[])
     get_file_path(lmosaic, dir);
     gid = mpp_get_varid(m_fid, "gridfiles");
     tid = mpp_get_varid(m_fid, "gridtiles");
-    for (n = 0; n < ntile_lnd; n++) {
-      int i, j;
-
+    for (int n = 0; n < ntile_lnd; n++) {
       start[0] = n; start[1] = 0; nread[0] = 1; nread[1] = STRING;
       mpp_get_var_value_block(m_fid, gid, start, nread, filename);
       ltile_name[n] = (char*)malloc(STRING * sizeof(char));
@@ -713,7 +710,7 @@ int main(int argc, char* argv[])
       area_lnd[n] = (double*)malloc((nxl[n]) * (nyl[n]) * sizeof(double));
       get_global_grid(file, nxl[n], nyl[n], x_refine, y_refine, xlnd[n], ylnd[n]);
       /*scale grid from degree to radian, because create_xgrid assume the grid is in radians */
-      for (i = 0; i < (nxl[n] + 1) * (nyl[n] + 1); i++) {
+      for (int i = 0; i < (nxl[n] + 1) * (nyl[n] + 1); i++) {
         xlnd[n][i] *= D2R;
         ylnd[n][i] *= D2R;
       }
@@ -734,7 +731,7 @@ int main(int argc, char* argv[])
       }
     }
     else {
-      for (n = 0; n < ntile_lnd; n++) {
+      for (int n = 0; n < ntile_lnd; n++) {
         get_grid_global_area(nxl[n], nyl[n], xlnd[n], ylnd[n], area_lnd[n]);
       }
     }
@@ -761,8 +758,8 @@ int main(int argc, char* argv[])
     ltile_name = atile_name;
     lnd_great_circle_algorithm = atm_great_circle_algorithm;
   }
-  int n;
-  for (n = 0; n < ntile_lnd; n++) {
+
+  for (int n = 0; n < ntile_lnd; n++) {
     if (mpp_pe() == mpp_root_pe() && verbose) printf("Number of ATM and LND cells for tile %d are %d, %d.\n", n + 1, nxa[n] * nya[n], nxl[n] * nyl[n]);
     if (nxa[n] * nya[n] != nxl[n] * nyl[n]) printf("Warning: Number of ATM and LND cells for tile %d are not equal %d, %d.\n", n + 1, nxa[n] * nya[n], nxl[n] * nyl[n]);
   }
@@ -773,11 +770,11 @@ int main(int argc, char* argv[])
    * Read ocean grid boundaries and mask (where water is) for each tile within the mosaic.
    */
   {
-    int n, ntiles, m_fid, g_fid, t_fid, vid, gid, tid;
+    int ntiles, m_fid, g_fid, t_fid, vid, gid, tid;
     size_t start[4], nread[4];
     char dir[STRING], filename[STRING], file[2 * STRING];
 
-    for (n = 0; n < 4; n++) {
+    for (int n = 0; n < 4; n++) {
       start[n] = 0;
       nread[n] = 1;
     }
@@ -799,10 +796,10 @@ int main(int argc, char* argv[])
     /* For the purpose of reproducing between processor count, the layout
        is set to (1, npes). */
 
-    for (n = 0; n < ntile_ocn; n++) {
+    for (int n = 0; n < ntile_ocn; n++) {
       double* tmpx, * tmpy;
       int i, j;
-      double min_atm_lat, min_lat;
+      double min_atm_lat;
       int nyo_old;
 
       start[0] = n; start[1] = 0; nread[0] = 1; nread[1] = STRING;
@@ -836,12 +833,11 @@ int main(int argc, char* argv[])
       get_global_grid(file, nxo[n], nyo[n], x_refine, y_refine, tmpx, tmpy);
 
       /* sometimes the ocean grid only covers part of the globe, especially may not cover
-   the south pole region. In order to get all the exchange grid between atmosXland,
-   we need to extend one point to cover the whole atmosphere. This needs the
-   assumption of one-tile ocean. Also we assume the latitude is the along j=0
+          the south pole region. In order to get all the exchange grid between atmosXland,
+          we need to extend one point to cover the whole atmosphere. This needs the
+          assumption of one-tile ocean. Also we assume the latitude is the along j=0
       */
       if (ntile_ocn == 1) {
-        int na;
         int is_uniform;
 
         /* check if the latitude is uniform or not at j=1 */
@@ -884,7 +880,7 @@ int main(int argc, char* argv[])
       cart_xocn = (double**)malloc(ntile_lnd * sizeof(double*));
       cart_yocn = (double**)malloc(ntile_lnd * sizeof(double*));
       cart_zocn = (double**)malloc(ntile_ocn * sizeof(double*));
-      for (n = 0; n < ntile_ocn; n++) {
+      for (int n = 0; n < ntile_ocn; n++) {
         cart_xocn[n] = (double*)malloc((nxo[n] + 1) * (nyo[n] + 1) * sizeof(double));
         cart_yocn[n] = (double*)malloc((nxo[n] + 1) * (nyo[n] + 1) * sizeof(double));
         cart_zocn[n] = (double*)malloc((nxo[n] + 1) * (nyo[n] + 1) * sizeof(double));
@@ -894,7 +890,7 @@ int main(int argc, char* argv[])
     }
     else {
       if (mpp_pe() == mpp_root_pe())printf("make_coupler_mosaic: Calculating area_ocn based on lat-lon segments between adjacent grid points.\n");
-      for (n = 0; n < ntile_ocn; n++) {
+      for (int n = 0; n < ntile_ocn; n++) {
         get_grid_global_area(nxo[n], nyo[n], xocn[n], yocn[n], area_ocn[n]);
       }
     }
@@ -902,7 +898,7 @@ int main(int argc, char* argv[])
 
     /* read ocean topography */
     omask = (double**)malloc(ntile_ocn * sizeof(double*));
-    for (n = 0; n < ntile_ocn; n++) {
+    for (int n = 0; n < ntile_ocn; n++) {
       char name[128];
       char depth_name[128], mask_name[128];
       int nx, ny, i, j;
@@ -969,13 +965,13 @@ int main(int argc, char* argv[])
    * Read wave grid
    */
   if (wmosaic) {
-    int n, m_fid, g_fid, vid, gid, tid;
+    int m_fid, g_fid, vid, gid, tid;
     size_t start[4], nread[4];
     char dir[STRING], filename[STRING], file[2 * STRING];
 
     if (strcmp(wmosaic, omosaic) == 0) wav_same_as_ocn = 1;
 
-    for (n = 0; n < 4; n++) {
+    for (int n = 0; n < 4; n++) {
       start[n] = 0;
       nread[n] = 1;
     }
@@ -993,9 +989,7 @@ int main(int argc, char* argv[])
     get_file_path(wmosaic, dir);
     gid = mpp_get_varid(m_fid, "gridfiles");
     tid = mpp_get_varid(m_fid, "gridtiles");
-    for (n = 0; n < ntile_wav; n++) {
-      int i, j;
-
+    for (int n = 0; n < ntile_wav; n++) {
       start[0] = n; start[1] = 0; nread[0] = 1; nread[1] = STRING;
       mpp_get_var_value_block(m_fid, gid, start, nread, filename);
       wtile_name[n] = (char*)malloc(STRING * sizeof(char));
@@ -1015,7 +1009,7 @@ int main(int argc, char* argv[])
       area_wav[n] = (double*)malloc((nxw[n]) * (nyw[n]) * sizeof(double));
 
       /*scale grid from degree to radian, because create_xgrid assume the grid is in radians */
-      for (i = 0; i < (nxw[n] + 1) * (nyw[n] + 1); i++) {
+      for (int i = 0; i < (nxw[n] + 1) * (nyw[n] + 1); i++) {
         xwav[n][i] *= D2R;
         ywav[n][i] *= D2R;
       }
@@ -1025,7 +1019,7 @@ int main(int argc, char* argv[])
       cart_xwav = (double**)malloc(ntile_wav * sizeof(double*));
       cart_ywav = (double**)malloc(ntile_wav * sizeof(double*));
       cart_zwav = (double**)malloc(ntile_wav * sizeof(double*));
-      for (n = 0; n < ntile_wav; n++) {
+      for (int n = 0; n < ntile_wav; n++) {
         cart_xwav[n] = (double*)malloc((nxw[n] + 1) * (nyw[n] + 1) * sizeof(double));
         cart_ywav[n] = (double*)malloc((nxw[n] + 1) * (nyw[n] + 1) * sizeof(double));
         cart_zwav[n] = (double*)malloc((nxw[n] + 1) * (nyw[n] + 1) * sizeof(double));
@@ -1034,7 +1028,7 @@ int main(int argc, char* argv[])
       }
     }
     else {
-      for (n = 0; n < ntile_wav; n++) {
+      for (int n = 0; n < ntile_wav; n++) {
         get_grid_global_area(nxw[n], nyw[n], xwav[n], ywav[n], area_wav[n]);
       }
     }
@@ -1043,22 +1037,21 @@ int main(int argc, char* argv[])
 
   /* remove longitude and latitude data when clip_method is 'great_circle' */
   if (!print_grid) {
-    int n;
     if (clip_method == GREAT_CIRCLE_CLIP) {
-      for (n = 0; n < ntile_atm; n++) {
+      for (int n = 0; n < ntile_atm; n++) {
         free(xatm[n]);
         free(yatm[n]);
       }
       free(xatm);
       free(yatm);
-      for (n = 0; n < ntile_ocn; n++) {
+      for (int n = 0; n < ntile_ocn; n++) {
         free(xocn[n]);
         free(yocn[n]);
       }
       free(xocn);
       free(yocn);
       if (xlnd) {
-        for (n = 0; n < ntile_lnd; n++) {
+        for (int n = 0; n < ntile_lnd; n++) {
           free(xlnd[n]);
           free(ylnd[n]);
         }
@@ -1066,7 +1059,7 @@ int main(int argc, char* argv[])
         free(ylnd);
       }
       if (xwav) {
-        for (n = 0; n < ntile_wav; n++) {
+        for (int n = 0; n < ntile_wav; n++) {
           free(xwav[n]);
           free(ywav[n]);
         }
@@ -1097,7 +1090,7 @@ int main(int argc, char* argv[])
   nfile_lxo = 0;
   int nbad = 0;
   {
-    int no, nl, na, n;
+    int no, nl, na;
     size_t** naxl, ** naxo;
     int*** atmxlnd_ia, *** atmxlnd_ja, *** atmxlnd_il, *** atmxlnd_jl;
     int*** atmxocn_ia, *** atmxocn_ja, *** atmxocn_io, *** atmxocn_jo;
@@ -1203,8 +1196,8 @@ int main(int argc, char* argv[])
     time_start = time(NULL);
     for (na = 0; na < ntile_atm; na++) {
 
-      int      k, l, is, ie, js, je, la, ia, ja, il, jl, io, jo, layout[2];
-      int      n0, n1, n2, n3, na_in, nl_in, no_in, n_out, n_out2;
+      int      l, is, ie, js, je, la, ia, ja, il, jl, io, jo, layout[2];
+      int      n0, n1, n2, n3, na_in, nl_in, no_in, n_out;
       double   xa_min, ya_min, xo_min, yo_min, xl_min, yl_min, xa_avg;
       double   xa_max, ya_max, xo_max, yo_max, xl_max, yl_max;
       double   xarea;
@@ -1214,13 +1207,12 @@ int main(int argc, char* argv[])
       double   x_out[MV], y_out[MV], z_out[MV];
       double   y_out_max, y_out_min;
       double   atmxlnd_x[MX][MV], atmxlnd_y[MX][MV], atmxlnd_z[MX][MV];
-      int      atmxlnd_c[MX][MV];
       int      num_v[MX];
       int      axl_i[MX], axl_j[MX], axl_t[MX];
       double   axl_xmin[MX], axl_xmax[MX], axl_ymin[MX], axl_ymax[MX];
       double   axl_area[MX], axl_clon[MX], axl_clat[MX];
       size_t   count;
-      int one, intc, atmxlnd_count;
+      int      atmxlnd_count;
       domain2D Dom;
       double   yy;
       int* js_lnd, * je_lnd;
@@ -1268,7 +1260,7 @@ int main(int argc, char* argv[])
         }
       }
       else {
-        ya_min = 9999;
+        ya_min = 9999; //TODO: why these limits
         ya_max = -9999;
         for (la = is;la <= ie;la++) {
 
@@ -1428,7 +1420,7 @@ int main(int argc, char* argv[])
               if (lnd_same_as_atm) {
                 if (na == nl && ja == jl && ia == il) {
                   n_out = 4;
-                  for (n = 0; n < n_out; n++) {
+                  for (int n = 0; n < n_out; n++) {
                     x_out[n] = xl[n];
                     y_out[n] = yl[n];
                     z_out[n] = zl[n];
@@ -1469,7 +1461,7 @@ int main(int argc, char* argv[])
                     mpp_error("make_coupler_mosaic: inconsistent number of grid box coreners");
                   }
                   n_out = nl_in;
-                  for (n = 0; n < n_out; n++) {
+                  for (int n = 0; n < n_out; n++) {
                     x_out[n] = xl[n];
                     y_out[n] = yl[n];
                   }
@@ -1493,17 +1485,17 @@ int main(int argc, char* argv[])
               if (fabs(y_out_min + 0.5 * M_PI) < 0.00003 && verbose) {
                 printf("Near South Pole ATMxLND grid cell,  ATMxLND_area/ATM_area =%f, ATM_area=%f, LND_area=%f \n", xarea / area_atm[na][la], area_atm[na][la], area_lnd[nl][jl * nxl[nl] + il]);
                 printf("longitudes and latitudes of the %d corners are:\n", n_out);
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
                 printf("\n");
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
                 printf("\n");
               }
               if (fabs(y_out_max - 0.5 * M_PI) < 0.00003 && verbose) {
                 printf("Near North Pole ATMxLND grid cell,  ATMxLND_area/ATM_area =%f, ATM_area=%f, LND_area=%f\n", xarea / area_atm[na][la], area_atm[na][la], area_lnd[nl][jl * nxl[nl] + il]);
                 printf("longitudes and latitudes of the %d corners are:\n", n_out);
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
                 printf("\n");
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
                 printf("\n");
               }
               if (xarea / min_area > area_ratio_thresh) {
@@ -1513,7 +1505,7 @@ int main(int argc, char* argv[])
                   printf("n_axl is %d\n", n_out);
                   /* convert to lon-lat */
                   xyz2latlon(n_out, x_out, y_out, z_out, xtmp, ytmp);
-                  for (n = 0; n < n_out; n++) printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
+                  for (int n = 0; n < n_out; n++) printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
                 }
 
                 axl_i[count] = il;
@@ -1528,14 +1520,14 @@ int main(int argc, char* argv[])
 
                 /*  remember the exchange grid vertices */
                 if (clip_method == GREAT_CIRCLE_CLIP) {
-                  for (n = 0; n < n_out; n++) {
+                  for (int n = 0; n < n_out; n++) {
                     atmxlnd_x[count][n] = x_out[n];
                     atmxlnd_y[count][n] = y_out[n];
                     atmxlnd_z[count][n] = z_out[n];
                   }
                 }
                 else {
-                  for (n = 0; n < n_out; n++) {
+                  for (int n = 0; n < n_out; n++) {
                     atmxlnd_x[count][n] = x_out[n];
                     atmxlnd_y[count][n] = y_out[n];
                   }
@@ -1618,19 +1610,19 @@ int main(int argc, char* argv[])
               }
               if (fabs(y_out_max - 0.5 * M_PI) < 0.00003 && fabs(yo_max - 0.5 * M_PI) < 0.00003 && verbose) {
                 printf("Near North Pole ATMxLND grid cell\n");
-                for (n = 0; n < na_in; n++) printf("%7.3f, ", xa[n] * R2D);
+                for (int n = 0; n < na_in; n++) printf("%7.3f, ", xa[n] * R2D);
                 printf("\n");
-                for (n = 0; n < na_in; n++) printf("%7.3f, ", ya[n] * R2D);
+                for (int n = 0; n < na_in; n++) printf("%7.3f, ", ya[n] * R2D);
                 printf("\n");
                 printf("Near North Pole OCN grid cell\n");
-                for (n = 0; n < no_in; n++) printf("%7.3f, ", xo[n] * R2D);
+                for (int n = 0; n < no_in; n++) printf("%7.3f, ", xo[n] * R2D);
                 printf("\n");
-                for (n = 0; n < no_in; n++) printf("%7.3f, ", yo[n] * R2D);
+                for (int n = 0; n < no_in; n++) printf("%7.3f, ", yo[n] * R2D);
                 printf("\n");
                 printf("Near North Pole ATMxLNDxOCN grid cell\n");
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", x_out[n] * R2D);
                 printf("\n");
-                for (n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
+                for (int n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
                 printf("\n");
               }
               if (n_out > 0) {
@@ -1666,6 +1658,7 @@ int main(int argc, char* argv[])
             }
             if (lnd_frac > MIN_AREA_FRAC) { /* over land */
               /* find the overlap of atmxlnd and ocean cell */
+              //TODO: l land count are not the same type.
               for (l = 0; l < count; l++) {
                 if (clip_method == GREAT_CIRCLE_CLIP)
                   n_out = clip_2dx2d_great_circle(atmxlnd_x[l], atmxlnd_y[l], atmxlnd_z[l], num_v[l], xo, yo, zo, 4,
@@ -1688,7 +1681,7 @@ int main(int argc, char* argv[])
                       /* convert to lon-lat */
                       xyz2latlon(n_out, x_out, y_out, z_out, xtmp, ytmp);
 
-                      for (n = 0; n < n_out; n++) printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
+                      for (int n = 0; n < n_out; n++) printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
                     }
 
                     axl_area[l] += xarea;
@@ -2528,8 +2521,8 @@ int main(int argc, char* argv[])
 
     for (nl = 0; nl < ntile_lnd; nl++) {
       int      il, jl, io, jo, is, ie, js, je, layout[2];
-      int      n0, n1, n2, n3, nl_in, no_in, n_out, nxgrid;
-      double   xarea, xctrlon, xctrlat;
+      int      n0, n1, n2, n3, nl_in, no_in, n_out;
+      double   xarea;
       double   xl_min, yl_min, xo_min, yo_min, xl_avg;
       double   xl_max, yl_max, xo_max, yo_max;
       double   xl[MV], yl[MV], zl[MV], xo[MV], yo[MV], zo[MV], x_out[MV], y_out[MV], z_out[MV];
@@ -2831,7 +2824,7 @@ int main(int argc, char* argv[])
 
           char contact[STRING];
           int fid, dim_string, dim_ncells, dim_two, dims[4];
-          int id_contact, id_xgrid_area, n;
+          int id_contact, id_xgrid_area;
           int id_tile1_cell, id_tile2_cell, id_tile1_dist, id_tile2_dist;
 
           for (i = 0; i < 4; i++) {
@@ -3048,14 +3041,13 @@ int main(int argc, char* argv[])
 
     for (nw = 0; nw < ntile_wav; nw++) {
 
-      int      l, is, ie, js, je, lw, iw, jw, ia, ja, io, jo, layout[2];
-      int      n0, n1, n2, n3, na_in, nw_in, no_in, n_out, n_out2;
+      int      is, ie, js, je, lw, iw, jw, io, jo, layout[2];
+      int      n0, n1, n2, n3, nw_in, no_in, n_out;
       double   xo_min, yo_min, xw_min, yw_min, xw_avg;
       double   xo_max, yo_max, xw_max, yw_max;
       double   xarea;
       double   xw[MV], yw[MV], zw[MV], xo[MV], yo[MV], zo[MV];
       double   x_out[MV], y_out[MV], z_out[MV];
-      size_t   count;
       domain2D Dom;
       double   yy;
       int* js_ocn, * je_ocn;
@@ -3393,11 +3385,9 @@ int main(int argc, char* argv[])
       /* calculate land/sea fraction for wave grid from wavxocn */
       {
         int    iw, jw;
-        double ocn_frac;
         int    id_mask, fid, dims[2];
         char   wav_mask_file[STRING];
         double* mask;
-        int ny;
 
         for (nw = 0; nw < ntile_wav; nw++) {
           mask = (double*)malloc(nxw[nw] * nyw[nw] * sizeof(double));
@@ -3668,11 +3658,11 @@ int main(int argc, char* argv[])
 
   /*Fianlly create the coupler mosaic file mosaic_name.nc */
   {
-    int fid, dim_string, dim_axo, dim_lxo, dim_axl, dim_axw, dim_wxo, dims[4], n;
+    int fid, dim_string, dim_axo, dim_lxo, dim_axl, dim_wxo, dims[4], n;
     size_t start[4], nwrite[4];
     int id_lmosaic_dir, id_lmosaic_file, id_omosaic_dir, id_omosaic_file, id_wmosaic_dir;
     int id_amosaic_dir, id_amosaic_file, id_otopog_dir, id_otopog_file, id_wmosaic_file;
-    int id_xgrids_dir, id_axo_file, id_lxo_file, id_axl_file, id_wxo_file;
+    int id_axo_file, id_lxo_file, id_axl_file, id_wxo_file;
     int id_amosaic, id_lmosaic, id_omosaic, id_wmosaic;
 
     fid = mpp_open(mosaic_file, MPP_WRITE);

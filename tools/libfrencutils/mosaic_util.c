@@ -45,8 +45,14 @@
     error handler: will print out error message and then abort
 ***********************************************************/
 
-PolyAreaStrategy fix_lon_strategy = ORIG_LON_FIX; //Needs original_lon_fix or no_lon_fix
-//PolyAreaStrategy fix_lon_strategy = NO_LON_FIX; //Needs original_lon_fix or no_lon_fix
+//Functions fix_lon and poly_are chenge their behavioors based on
+// fix_lon_strategy and from_pole_threshold_rad
+//LonFixStrategy fix_lon_strategy = LON_FIX; //lon only fix
+LonFixStrategy fix_lon_strategy = FULL_FIX; // original_lon_fix  (lon plus)
+const double from_pole_threshold_rad = -0.1;//negatve for never
+//const double from_pole_threshold_rad = 0.174532925; // ten degrees
+//const double from_pole_threshold_rad = 0.043633231; //2.5 deg
+
 
 int reproduce_siena = 0;
 
@@ -625,12 +631,9 @@ int fix_lon_v2(double x[], double y[], int n){
 }
 
 int at_pole(const double x[], const double y[], int n){
-  const double ten_deg_rad = 0.174532925;
-  const double five_deg_rad = 0.087266463;
   int pole = 0;
   for (int i = 0; i < n; i++) {
-    //if (fabs(y[i]) >= M_PI_2 - TOLORENCE){
-    if (fabs(y[i]) >= M_PI_2 - five_deg_rad){
+    if (fabs(y[i]) > (M_PI_2 - from_pole_threshold_rad)){
       pole = 1;
     }
   }
@@ -713,104 +716,86 @@ double rotate_poly(const double x[], const double y[], const int n, double xr[],
   }
 }
 
-int fix_lon(double x[], double y[], int n, double tlon){
-  int  nn = n;
-
-  if(fix_lon_strategy != ORIG_LON_FIX){
-    return nn;
-  }else{
-    nn = lon_fix_pas(x, y, n, tlon, ORIG_LON_FIX );
-    return nn;
-  }
-}
-
-int lon_fix_pas(double x[], double y[], int n, double tlon, PolyAreaStrategy pas) {
+int fix_lon(double x[], double y[], int n, double tlon) {
   double x_sum, dx;
   int i, nn = n;
 
-  if (pas != ORIG_LON_FIX) {
-    return nn;
-  }
 
-  /* all pole points must be paired */
-  /* The reason is poly_area() function needs a contribution equal to the angle (in radians)
-   between the sides that connect to the pole. */
-  for (i = 0; i < nn; i++) {
-    if (fabs(y[i]) >= HPI - TOLORENCE) {
-      int im = (i + nn - 1) % nn;
-      int ip = (i + 1) % nn;
+  if(fix_lon_strategy == FULL_FIX){
 
-      if (y[im] == y[i] && y[ip] == y[i]) {
-        nn = delete_vtx(x, y, nn, i);
-        i--;
+    /* all pole points must be paired */
+    /* The reason is poly_area() function needs a contribution equal to the angle (in radians)
+     between the sides that connect to the pole. */
+    for (i = 0; i < nn; i++) {
+      if (fabs(y[i]) >= HPI - TOLORENCE) {
+        int im = (i + nn - 1) % nn;
+        int ip = (i + 1) % nn;
+
+        if (y[im] == y[i] && y[ip] == y[i]) {
+          nn = delete_vtx(x, y, nn, i);
+          i--;
+        }
+        else if (y[im] != y[i] && y[ip] != y[i]) {
+          nn = insert_vtx(x, y, nn, i, x[i], y[i]);
+          i++;
+        }
       }
-      else if (y[im] != y[i] && y[ip] != y[i]) {
-        nn = insert_vtx(x, y, nn, i, x[i], y[i]);
-        i++;
+    }
+    /* first of pole pair has longitude of previous vertex */
+    /* second of pole pair has longitude of subsequent vertex */
+    for (i = 0; i < nn; i++) {
+      if (fabs(y[i]) >= HPI - TOLORENCE) {
+        int im = (i + nn - 1) % nn;
+        int ip = (i + 1) % nn;
+        if (y[im] != y[i])
+          x[i] = x[im];
+        if (y[ip] != y[i])
+          x[i] = x[ip];
+      }
+    }
+
+    /*If a polygon side passes through a Pole insert twin vertices at the Pole*/
+    /*A fix is also directly applied to poly_area to handle this case.*/
+    for (i = 0; i < nn; i++) {
+      int im = (i + nn - 1) % nn, ip = (i + 1) % nn;
+      double dx = x[i] - x[im];
+      if (fabs(dx + M_PI) < SMALL_VALUE || fabs(dx - M_PI) < SMALL_VALUE) {
+        double x1 = x[im];
+        double x2 = x[i];
+        double ypole = HPI;
+        if (y[i] < 0.0)
+          ypole = -HPI;
+        nn = insert_vtx(x, y, nn, i, x2, ypole);
+        nn = insert_vtx(x, y, nn, i, x1, ypole);
+        break;
       }
     }
   }
-  /* first of pole pair has longitude of previous vertex */
-  /* second of pole pair has longitude of subsequent vertex */
-  for (i = 0; i < nn; i++) {
-    if (fabs(y[i]) >= HPI - TOLORENCE) {
-      int im = (i + nn - 1) % nn;
-      int ip = (i + 1) % nn;
-      if (y[im] != y[i])
-        x[i] = x[im];
-      if (y[ip] != y[i])
-        x[i] = x[ip];
+
+  if ((fix_lon_strategy == FULL_FIX) || (fix_lon_strategy == LON_FIX)) {
+    if (nn)
+      x_sum = x[0];
+    else
+      return (0);
+
+    for (i = 1; i < nn; i++) {
+      double dx = x[i] - x[i - 1];
+
+      if (dx < -M_PI)
+        dx = dx + TPI;
+      else if (dx > M_PI)
+        dx = dx - TPI;
+      x_sum += (x[i] = x[i - 1] + dx);
     }
-  }
 
-  /*If a polygon side passes through a Pole insert twin vertices at the Pole*/
-  /*A fix is also directly applied to poly_area to handle this case.*/
-  for (i = 0; i < nn; i++) {
-    int im = (i + nn - 1) % nn, ip = (i + 1) % nn;
-    double dx = x[i] - x[im];
-    if (fabs(dx + M_PI) < SMALL_VALUE || fabs(dx - M_PI) < SMALL_VALUE) {
-      double x1 = x[im];
-      double x2 = x[i];
-      double ypole = HPI;
-      if (y[i] < 0.0)
-        ypole = -HPI;
-      nn = insert_vtx(x, y, nn, i, x2, ypole);
-      nn = insert_vtx(x, y, nn, i, x1, ypole);
-      break;
-    }
-  }
-
-  if (nn)
-    x_sum = x[0];
-  else
-    return (0);
-
-  for (i = 1; i < nn; i++) {
-    double dx = x[i] - x[i - 1];
-
+    dx = (x_sum / nn) - tlon;
     if (dx < -M_PI)
-      dx = dx + TPI;
+      for (i = 0; i < nn; i++)
+        x[i] += TPI;
     else if (dx > M_PI)
-      dx = dx - TPI;
-    x_sum += (x[i] = x[i - 1] + dx);
+      for (i = 0; i < nn; i++)
+        x[i] -= TPI;
   }
-
-  dx = (x_sum / nn) - tlon;
-  if (dx < -M_PI)
-    for (i = 0; i < nn; i++)
-      x[i] += TPI;
-  else if (dx > M_PI)
-    for (i = 0; i < nn; i++)
-      x[i] -= TPI;
-
-/*
-  int pole = at_pole(x, y, nn);
-  if (pole) {
-    printf("area=%g\n", poly_area(x, y, nn));
-    v_print(x, y, nn);
-    printf("---------<\n");
-  }
-  */
 
   return (nn);
 } /* fix_lon */

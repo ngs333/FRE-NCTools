@@ -37,7 +37,7 @@
 #define min(a,b) (a<b ? a:b)
 #define max(a,b) (a>b ? a:b)
 #define SMALL_VALUE ( 1.e-10 )
-typedef enum {ORIG_LON_FIX = 1, NO_LON_FIX, ROTATE, SPHERE_EXCESS} PolyAreaStrategy;
+typedef enum {FULL_FIX = 1, LON_FIX, NO_FIX} LonFixStrategy;
 
 struct Node{
   double x, y, z, u, u_clip;
@@ -53,7 +53,6 @@ struct Node{
 
 void error_handler(const char *msg);
 int nearest_index(double value, const double *array, int ia);
-int lon_fix(double *x, double *y, int n_in, double tlon);
 double minval_double(int size, const double *data);
 double maxval_double(int size, const double *data);
 double avgval_double(int size, const double *data);
@@ -121,7 +120,6 @@ double se_area(const double x[], const double y[], const int n);
 void rotate_point_ra( double rv[]);
 double rotate_poly(const double x[], const double y[], const int n,
   double xr[], double yr[]);
-int lon_fix_pas(double *x, double *y, int n_in, double tlon, PolyAreaStrategy pas);
 void get_rotation_matrix(double m[3][3]);
 void set_reproduce_siena_true(void);
 
