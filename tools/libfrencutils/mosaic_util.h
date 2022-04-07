@@ -115,10 +115,14 @@ void setInbound(struct Node *interList, struct Node *list);
 int isInside(struct Node *node);
 int areApproxEqual(double a, double b, double delta);
 int areApproxEqualPct(double a, double b, double pct);
-int at_pole(const double x[], const double y[], int n);
+int areApproxEqualPctPlus(double a, double b, double pct);
+void check_value_debug(double v);
+void print_polygon_x(char * str, double* x, double* y, int n, double xoff, double yoff);
+int is_near_pole(const double x[], const double y[], int n);
+int crosses_pole(const double x[], const double y[], int n);
 double se_area(const double x[], const double y[], const int n);
 void rotate_point_ra( double rv[]);
-double rotate_poly(const double x[], const double y[], const int n,
+void rotate_poly(const double x[], const double y[], const int n,
   double xr[], double yr[]);
 void get_rotation_matrix(double m[3][3]);
 void set_reproduce_siena_true(void);

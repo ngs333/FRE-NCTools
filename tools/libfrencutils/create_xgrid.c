@@ -83,7 +83,15 @@ void get_grid_area(const int *nlon, const int *nlat, const double *lon, const do
     y_in[1] = lat[j*nxp+i+1];
     y_in[2] = lat[(j+1)*nxp+i+1];
     y_in[3] = lat[(j+1)*nxp+i];
+    if (i == 24 && j == 24) {
+      printf("poly_area : 24_24. Poly is:\n");
+      v_print(x_in, y_in, 4);
+    }
     n_in = fix_lon(x_in, y_in, 4, M_PI);
+    if (i == 24 && j == 24) {
+      printf("poly_area : 24_24. Poly is:\n");
+      v_print(x_in, y_in, n_in);
+    }
     area[j*nx+i] = poly_area(x_in, y_in, n_in);
   }
 
@@ -1263,72 +1271,72 @@ int clip(const double lon_in[], const double lat_in[], int n_in, double ll_lon, 
 *******************************************************************************/
 
 int clip_2dx2d(const double lon1_in[], const double lat1_in[], int n1_in,
-	 const double lon2_in[], const double lat2_in[], int n2_in,
-	 double lon_out[], double lat_out[])
+  const double lon2_in[], const double lat2_in[], int n2_in,
+  double lon_out[], double lat_out[])
 {
   double lon_tmp[MV], lat_tmp[MV];
   double lon2_tmp[MV], lat2_tmp[MV];
   double x1_0, y1_0, x1_1, y1_1, x2_0, y2_0, x2_1, y2_1;
   double dx1, dy1, dx2, dy2, determ, ds1, ds2;
   int i_out, n_out, inside_last, inside, i1, i2;
-  int gttwopi=0;
+  int gttwopi = 0;
   /* clip polygon with each boundary of the polygon */
   /* We treat lon1_in/lat1_in as clip polygon and lon2_in/lat2_in as subject polygon */
   n_out = n1_in;
-  for(i1=0; i1<n1_in; i1++) {
+  for (i1 = 0; i1 < n1_in; i1++) {
     lon_tmp[i1] = lon1_in[i1];
     lat_tmp[i1] = lat1_in[i1];
-    if(lon_tmp[i1]>TPI || lon_tmp[i1]<0.0) gttwopi = 1;
+    if (lon_tmp[i1] > TPI || lon_tmp[i1] < 0.0) gttwopi = 1;
   }
-  for(i2=0; i2<n2_in; i2++) {
+  for (i2 = 0; i2 < n2_in; i2++) {
     lon2_tmp[i2] = lon2_in[i2];
     lat2_tmp[i2] = lat2_in[i2];
   }
   //Some grid boxes near North Pole are clipped wrong (issue #42 )
   //The following heuristic fix seems to work. Why?
-  if(gttwopi){pimod(lon_tmp,n1_in);pimod(lon2_tmp,n2_in);} 
+  if (gttwopi) { pimod(lon_tmp, n1_in);pimod(lon2_tmp, n2_in); }
 
-  x2_0 = lon2_tmp[n2_in-1];
-  y2_0 = lat2_tmp[n2_in-1];
-  for(i2=0; i2<n2_in; i2++) {
+  x2_0 = lon2_tmp[n2_in - 1];
+  y2_0 = lat2_tmp[n2_in - 1];
+  for (i2 = 0; i2 < n2_in; i2++) {
     x2_1 = lon2_tmp[i2];
     y2_1 = lat2_tmp[i2];
-    x1_0 = lon_tmp[n_out-1];
-    y1_0 = lat_tmp[n_out-1];
-    inside_last = inside_edge( x2_0, y2_0, x2_1, y2_1, x1_0, y1_0);
-    for(i1=0, i_out=0; i1<n_out; i1++) {
+    x1_0 = lon_tmp[n_out - 1];
+    y1_0 = lat_tmp[n_out - 1];
+    inside_last = inside_edge(x2_0, y2_0, x2_1, y2_1, x1_0, y1_0);
+    for (i1 = 0, i_out = 0; i1 < n_out; i1++) {
       x1_1 = lon_tmp[i1];
       y1_1 = lat_tmp[i1];
-      if((inside = inside_edge(x2_0, y2_0, x2_1, y2_1, x1_1, y1_1)) != inside_last ) {
+      if ((inside = inside_edge(x2_0, y2_0, x2_1, y2_1, x1_1, y1_1)) != inside_last) {
         /* there is intersection, the line between <x1_0,y1_0> and  <x1_1,y1_1>
            should not parallel to the line between <x2_0,y2_0> and  <x2_1,y2_1>
            may need to consider truncation error */
-	dy1 = y1_1-y1_0;
-	dy2 = y2_1-y2_0;
-	dx1 = x1_1-x1_0;
-	dx2 = x2_1-x2_0;
-	ds1 = y1_0*x1_1 - y1_1*x1_0;
-	ds2 = y2_0*x2_1 - y2_1*x2_0;
-	determ = dy2*dx1 - dy1*dx2;
-        if(fabs(determ) < EPSLN30) {
-	  error_handler("the line between <x1_0,y1_0> and  <x1_1,y1_1> should not parallel to "
-				     "the line between <x2_0,y2_0> and  <x2_1,y2_1>");
-	}
-	lon_out[i_out]   = (dx2*ds1 - dx1*ds2)/determ;
-	lat_out[i_out++] = (dy2*ds1 - dy1*ds2)/determ;
+        dy1 = y1_1 - y1_0;
+        dy2 = y2_1 - y2_0;
+        dx1 = x1_1 - x1_0;
+        dx2 = x2_1 - x2_0;
+        ds1 = y1_0 * x1_1 - y1_1 * x1_0;
+        ds2 = y2_0 * x2_1 - y2_1 * x2_0;
+        determ = dy2 * dx1 - dy1 * dx2;
+        if (fabs(determ) < EPSLN30) {
+          error_handler("the line between <x1_0,y1_0> and  <x1_1,y1_1> should not parallel to "
+            "the line between <x2_0,y2_0> and  <x2_1,y2_1>");
+        }
+        lon_out[i_out] = (dx2 * ds1 - dx1 * ds2) / determ;
+        lat_out[i_out++] = (dy2 * ds1 - dy1 * ds2) / determ;
 
 
       }
-      if(inside) {
-	lon_out[i_out]   = x1_1;
-	lat_out[i_out++] = y1_1;
+      if (inside) {
+        lon_out[i_out] = x1_1;
+        lat_out[i_out++] = y1_1;
       }
       x1_0 = x1_1;
       y1_0 = y1_1;
       inside_last = inside;
     }
-    if(!(n_out=i_out)) return 0;
-    for(i1=0; i1<n_out; i1++) {
+    if (!(n_out = i_out)) return 0;
+    for (i1 = 0; i1 < n_out; i1++) {
       lon_tmp[i1] = lon_out[i1];
       lat_tmp[i1] = lat_out[i1];
     }
@@ -1337,7 +1345,7 @@ int clip_2dx2d(const double lon1_in[], const double lat1_in[], int n1_in,
     y2_0 = y2_1;
   }
   return(n_out);
-}; /* clip */
+} /* clip */
 
 void pimod(double x[],int nn)
 {
@@ -2085,85 +2093,83 @@ int line_intersect_2D_3D(double *a1, double *a2, double *q1, double *q2, double 
   This routine is used to calculate the latitude of the centroid
    ---------------------------------------------------------------------------*/
 
-double poly_ctrlat(const double x[], const double y[], int n)
-{
+double poly_ctrlat(const double x[], const double y[], int n) {
   double ctrlat = 0.0;
   int    i;
 
-  for (i=0;i<n;i++) {
-    int ip = (i+1) % n;
-    double dx = (x[ip]-x[i]);
+  for (i = 0;i < n;i++) {
+    int ip = (i + 1) % n;
+    double dx = (x[ip] - x[i]);
     double dy, avg_y, hdy;
     double lat1, lat2;
     lat1 = y[ip];
     lat2 = y[i];
     dy = lat2 - lat1;
-    hdy = dy*0.5;
-    avg_y = (lat1+lat2)*0.5;
-    if      (dx==0.0) continue;
-    if(dx > M_PI)  dx = dx - 2.0*M_PI;
-    if(dx < -M_PI) dx = dx + 2.0*M_PI;
+    hdy = dy * 0.5;
+    avg_y = (lat1 + lat2) * 0.5;
+    if (dx == 0.0) continue;
+    if (dx > M_PI)  dx = dx - 2.0 * M_PI;
+    if (dx < -M_PI) dx = dx + 2.0 * M_PI;
 
-    if ( fabs(hdy)< SMALL_VALUE ) /* cheap area calculation along latitude */
-      ctrlat -= dx*(2*cos(avg_y) + lat2*sin(avg_y) - cos(lat1) );
+    if (fabs(hdy) < SMALL_VALUE) /* cheap area calculation along latitude */
+      ctrlat -= dx * (2 * cos(avg_y) + lat2 * sin(avg_y) - cos(lat1));
     else
-      ctrlat -= dx*( (sin(hdy)/hdy)*(2*cos(avg_y) + lat2*sin(avg_y)) - cos(lat1) );
+      ctrlat -= dx * ((sin(hdy) / hdy) * (2 * cos(avg_y) + lat2 * sin(avg_y)) - cos(lat1));
   }
-  return (ctrlat*RADIUS*RADIUS);
-}; /* poly_ctrlat */
+  return (ctrlat * RADIUS * RADIUS);
+} /* poly_ctrlat */
 
 /*------------------------------------------------------------------------------
   double poly_ctrlon(const double x[], const double y[], int n, double clon)
   This routine is used to calculate the lontitude of the centroid.
    ---------------------------------------------------------------------------*/
-double poly_ctrlon(const double x[], const double y[], int n, double clon)
-{
+double poly_ctrlon(const double x[], const double y[], int n, double clon) {
   double ctrlon = 0.0;
   int    i;
 
   clon = clon;
-  for (i=0;i<n;i++) {
-    int ip = (i+1) % n;
+  for (i = 0;i < n;i++) {
+    int ip = (i + 1) % n;
     double phi1, phi2, dphi, lat1, lat2, dphi1, dphi2;
     double f1, f2, fac, fint;
-    phi1   = x[ip];
-    phi2   = x[i];
+    phi1 = x[ip];
+    phi2 = x[i];
     lat1 = y[ip];
     lat2 = y[i];
-    dphi   = phi1 - phi2;
+    dphi = phi1 - phi2;
 
-    if      (dphi==0.0) continue;
+    if (dphi == 0.0) continue;
 
-    f1 = 0.5*(cos(lat1)*sin(lat1)+lat1);
-    f2 = 0.5*(cos(lat2)*sin(lat2)+lat2);
+    f1 = 0.5 * (cos(lat1) * sin(lat1) + lat1);
+    f2 = 0.5 * (cos(lat2) * sin(lat2) + lat2);
 
-     /* this will make sure longitude of centroid is at
-        the same interval as the center of any grid */
-    if(dphi > M_PI)  dphi = dphi - 2.0*M_PI;
-    if(dphi < -M_PI) dphi = dphi + 2.0*M_PI;
+    /* this will make sure longitude of centroid is at
+       the same interval as the center of any grid */
+    if (dphi > M_PI)  dphi = dphi - 2.0 * M_PI;
+    if (dphi < -M_PI) dphi = dphi + 2.0 * M_PI;
     dphi1 = phi1 - clon;
-    if( dphi1 > M_PI) dphi1 -= 2.0*M_PI;
-    if( dphi1 <-M_PI) dphi1 += 2.0*M_PI;
-    dphi2 = phi2 -clon;
-    if( dphi2 > M_PI) dphi2 -= 2.0*M_PI;
-    if( dphi2 <-M_PI) dphi2 += 2.0*M_PI;
+    if (dphi1 > M_PI) dphi1 -= 2.0 * M_PI;
+    if (dphi1 < -M_PI) dphi1 += 2.0 * M_PI;
+    dphi2 = phi2 - clon;
+    if (dphi2 > M_PI) dphi2 -= 2.0 * M_PI;
+    if (dphi2 < -M_PI) dphi2 += 2.0 * M_PI;
 
-    if(fabs(dphi2 -dphi1) < M_PI) {
-      ctrlon -= dphi * (dphi1*f1+dphi2*f2)/2.0;
+    if (fabs(dphi2 - dphi1) < M_PI) {
+      ctrlon -= dphi * (dphi1 * f1 + dphi2 * f2) / 2.0;
     }
     else {
-      if(dphi1 > 0.0)
-	fac = M_PI;
+      if (dphi1 > 0.0)
+        fac = M_PI;
       else
-	fac = -M_PI;
-      fint = f1 + (f2-f1)*(fac-dphi1)/fabs(dphi);
-      ctrlon -= 0.5*dphi1*(dphi1-fac)*f1 - 0.5*dphi2*(dphi2+fac)*f2
-	+ 0.5*fac*(dphi1+dphi2)*fint;
-	}
+        fac = -M_PI;
+      fint = f1 + (f2 - f1) * (fac - dphi1) / fabs(dphi);
+      ctrlon -= 0.5 * dphi1 * (dphi1 - fac) * f1 - 0.5 * dphi2 * (dphi2 + fac) * f2
+        + 0.5 * fac * (dphi1 + dphi2) * fint;
+    }
 
   }
-  return (ctrlon*RADIUS*RADIUS);
-};   /* poly_ctrlon */
+  return (ctrlon * RADIUS * RADIUS);
+}   /* poly_ctrlon */
 
 /* -----------------------------------------------------------------------------
    double box_ctrlat(double ll_lon, double ll_lat, double ur_lon, double ur_lat)
@@ -2178,7 +2184,7 @@ double box_ctrlat(double ll_lon, double ll_lat, double ur_lon, double ur_lat)
   if(dphi < -M_PI) dphi = dphi + 2.0*M_PI;
   ctrlat = dphi*(cos(ur_lat) + ur_lat*sin(ur_lat)-(cos(ll_lat) + ll_lat*sin(ll_lat)));
   return (ctrlat*RADIUS*RADIUS);
-}; /* box_ctrlat */
+} /* box_ctrlat */
 
 /*------------------------------------------------------------------------------
   double box_ctrlon(double ll_lon, double ll_lat, double ur_lon, double ur_lat, double clon)
@@ -2737,7 +2743,7 @@ int main(int argc, char* argv[])
     case 14:
       /****************************************************************
        test clip_2dx2d_great_cirle case 14: Cubic sphere grid at tile = 3, point (i=24,j=1)
-         identical grid boxes 
+         identical grid boxes
       ****************************************************************/
       /*
       nlon1 = 1;
@@ -2787,7 +2793,7 @@ int main(int argc, char* argv[])
 
     case 16:
       /*Must give [[-57.748, -30, -30, -97.6, -97.6],
-                   [89.876, 89.891, 90, 90, 89.9183]]*/ 
+                   [89.876, 89.891, 90, 90, 89.9183]]*/
       n1_in = 6; n2_in = 5;
       double lon1_16[] = {82.400,  82.400, 262.400, 262.400, 326.498, 379.641};
       double lat1_16[] = {89.835,  90.000,  90.000,  89.847,  89.648,  89.642};
@@ -2829,11 +2835,11 @@ int main(int argc, char* argv[])
       /*Must give nothing*/
     case 19:
       /****************************************************************
-        test clip_2dx2d 2: two boxes that include the North Pole 
+        test clip_2dx2d 2: two boxes that include the North Pole
                            one has vertices on the tripolar fold
                            the other is totally outside the first
                            This actually happens for some stretched grid
-                           configurations  mosaic_c256r25tlat32.0_om4p25 
+                           configurations  mosaic_c256r25tlat32.0_om4p25
         The test gives wrong answers!
       ****************************************************************/
       n1_in = 6; n2_in = 5;
@@ -2850,7 +2856,7 @@ int main(int argc, char* argv[])
 
     case 20:
       /*Must give
- n_out= 5 
+ n_out= 5
  122.176, 150, 150, 82.4, 82.4,
  89.761, 89.789, 90, 90, 89.8429,
        */      n1_in = 6; n2_in = 5;
@@ -2867,10 +2873,10 @@ int main(int argc, char* argv[])
 
     case 21:
       /*Must give
- n_out= 5 
+ n_out= 5
  60.000,  82.400,  82.400,  60.000],
  89.889,  89.843,  90.000,  90.000]
-       */      
+       */
       n1_in = 6; n2_in = 5;
       double lon1_21[] = {82.400,  82.400, 262.400, 262.400, 326.498, 379.641};
       double lat1_21[] = {89.835,  90.000,  90.000,  89.847,  89.648,  89.642};
@@ -2886,7 +2892,7 @@ int main(int argc, char* argv[])
     case 26:
       /*Side crosses SP (Right cell).
 	Must give same box
-      */      
+      */
       n1_in = 4; n2_in = 4;
       double lon1_22[] = {209.68793552504,158.60256162113,82.40000000000,262.40000000000};
       double lat1_22[] = {-89.11514201451,-89.26896927380,-89.82370183256, -89.46584623220};
@@ -2902,8 +2908,8 @@ int main(int argc, char* argv[])
     case 23:
       /*Side does not cross SP (Right cell).
 	Must give same box
-      */      
-      
+      */
+
       n1_in = 4; n2_in = 4;
       double lon1_23[] = {158.60256162113,121.19651597620,82.40000000000,82.40000000000};
       double lat1_23[] = {-89.26896927380,-88.85737639760,-89.10746816044,-89.82370183256};
@@ -2919,7 +2925,7 @@ int main(int argc, char* argv[])
     case 24:
       /*Side crosses SP (Left cell). Added twin poles.
 	Must give the same box
-      */      
+      */
       n1_in = 6; n2_in = 6;
       double lon1_24[] = {262.40000000000,262.40000000000,82.4,82.4,6.19743837887,-44.88793552504};
       double lat1_24[] = {-89.46584623220,-90.0,         -90.0,-89.82370183256, -89.26896927380, -89.11514201451};
@@ -2932,9 +2938,9 @@ int main(int argc, char* argv[])
       memcpy(lat2_in,lat2_24,sizeof(lat2_in));
       break;
     case 25:
-      /*Side crosses SP (Left cell). 
+      /*Side crosses SP (Left cell).
 	Must givethe same box
-      */      
+      */
       n1_in = 4; n2_in = 4;
       double lon1_25[] = {262.40000000000,82.4,6.19743837887,-44.88793552504};
       double lat1_25[] = {-89.46584623220, -89.82370183256, -89.26896927380, -89.11514201451};
@@ -2949,7 +2955,7 @@ int main(int argc, char* argv[])
     case 22:
       /*Side does not cross SP (Left cell).
 	Must give same box
-      */       
+      */
       n1_in = 4; n2_in = 4;
       double lon1_26[] = {82.4,82.4,43.60348402380,6.19743837887};
       double lat1_26[] = {-89.82370183256, -89.10746816044, -88.85737639760, -89.26896927380};
@@ -3058,7 +3064,7 @@ int main(int argc, char* argv[])
       printf("\n");
       for(i=0; i<n2_in; i++) printf(" %g,", lat2_in[i]*R2D);
       printf("\n");
-      
+
 
       printf("     output clip grid box longitude, latitude, area= %g \n ",area_out);
       printf("n_out= %d \n",n_out);
@@ -3066,7 +3072,7 @@ int main(int argc, char* argv[])
       printf("\n");
       for(i=0; i<n_out; i++) printf(" %g,", lat_out[i]*R2D);
       printf("\n");
-      if(area1>1.0e14 || area2>1.0e14 || area_out>1.0e14) printf("Error in calculating area !\n");  
+      if(area1>1.0e14 || area2>1.0e14 || area_out>1.0e14) printf("Error in calculating area !\n");
       if(n==16 || n==20) printf("Must result n_out=5!\n");
       if(n==21) printf("Must result n_out=4!\n");
       if(n==15 || n==17) printf("Must result the second box!\n");
