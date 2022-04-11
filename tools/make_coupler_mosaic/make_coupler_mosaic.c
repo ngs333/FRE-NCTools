@@ -1452,9 +1452,9 @@ int main(int argc, char* argv[])
               xl[2] = xlnd[nl][n2]; yl[2] = ylnd[nl][n2];
               xl[3] = xlnd[nl][n3]; yl[3] = ylnd[nl][n3];
               if (print_grid)
-                print_polygon_x("land grid is:", xl, yl, 4, 0.0, 0.0);
+                print_polygon_ll("land grid is:", xl, yl, 4, 0.0, 0.0);
               //if (dflag == 1)
-              //  print_polygon_x("land grid is:", xl, yl, 4, 0.0, 0.0);
+              //  print_polygon_ll("land grid is:", xl, yl, 4, 0.0, 0.0);
               yl_min = minval_double(4, yl);
               yl_max = maxval_double(4, yl);
               if (yl_min >= ya_max || yl_max <= ya_min) continue;
@@ -1598,10 +1598,10 @@ int main(int argc, char* argv[])
               xo[2] = xocn[no][n2]; yo[2] = yocn[no][n2];
               xo[3] = xocn[no][n3]; yo[3] = yocn[no][n3];
               //if (print_grid)
-              //  print_polygon_x("ocean grid:", xo, yo, 4,  360.0, 0.0);
+              //  print_polygon_ll("ocean grid:", xo, yo, 4,  360.0, 0.0);
               //if( dflag == 1 && is_near_pole(xo, yo, 4) ){
               //  printf("ocean grid bf jo io : %d %d", jo, io);
-              //  print_polygon_x("\nocean grid bf:", xo, yo, 4,  360.0, 0.0);
+              //  print_polygon_ll("\nocean grid bf:", xo, yo, 4,  360.0, 0.0);
               //}
               yo_min = minval_double(4, yo);//TODO: Note lat min/max is calc before lon_fix
               yo_max = maxval_double(4, yo);
@@ -1609,7 +1609,7 @@ int main(int argc, char* argv[])
               xo_min = minval_double(no_in, xo);
               xo_max = maxval_double(no_in, xo);
               //if( dflag == 1 && is_near_pole(xo, yo, 4) )
-              //  print_polygon_x("ocean grid af:", xo, yo, no_in, 0.0, 0.0);
+              //  print_polygon_ll("ocean grid af:", xo, yo, no_in, 0.0, 0.0);
             }
             ocn_frac = omask[no][jo * nxo[no] + io];
             lnd_frac = 1 - ocn_frac;
@@ -1628,9 +1628,9 @@ int main(int argc, char* argv[])
                 n_out = clip_2dx2d(xa, ya, na_in, xo, yo, no_in, x_out, y_out);
                 if (dflag == 1 && ( is_near_pole(xa, ya, na_in) && is_near_pole(xo, yo, no_in))){
                    printf("\nAC: n_out= %d ocn_frac=%g\n", n_out, ocn_frac);
-                   print_polygon_x("ATMxLND grid cell:", xa, ya, na_in, 0.0, 0.0);
-                   print_polygon_x("OCN grid cell:", xo, yo, no_in, 0.0, 0.0);
-                   print_polygon_x("ATMxLNDxOCN grid cell:", x_out, y_out, n_out, 0.0, 0.0);
+                   print_polygon_xyz("ATMxLND grid cell:", xa, ya, na_in, 1.0);
+                   print_polygon_xyz("OCN grid cell:", xo, yo, no_in, 1.0);
+                   print_polygon_xyz("ATMxLNDxOCN grid cell:", x_out, y_out, n_out, 1.0);
                 }
               }
               if (verbose && fabs(y_out_max - 0.5 * M_PI) < 0.00003 && fabs(yo_max - 0.5 * M_PI) < 0.00003) {
@@ -1650,7 +1650,7 @@ int main(int argc, char* argv[])
                 for (int n = 0; n < n_out; n++) printf("%7.3f, ", y_out[n] * R2D);
                 printf("\n");
               }
-              if (dflag == 111111111111) {
+              if (dflag == 1) {
                 printf("\nAC: n_out= %d\n", n_out);
                 printf("AC: na la no jo io: %d %d %d %d js_ocn je_ocn is_ocn ie_ecn : %d %d %d %d %d\n",
                   na, la, jo, io, no, js_ocn[no], je_ocn[no], is_ocn[no], ie_ocn[no]);

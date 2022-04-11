@@ -1,3 +1,14 @@
 {
-    "C_Cpp.errorSquiggles": "Disabled"
+    "C_Cpp.errorSquiggles": "Disabled",
+    "files.associations": {
+        "*.tcc": "c",
+        "limits": "c",
+        "numeric": "c",
+        "streambuf": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "algorithm": "c",
+        "cstdlib": "c"
+    }
 }

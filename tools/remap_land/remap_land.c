@@ -24,6 +24,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <time.h>
+#include <limits.h>
 #include "read_mosaic.h"
 #include "mosaic_util.h"
 #include "tool_util.h"
@@ -2793,7 +2795,9 @@ int partition(int v[], int v2[], int low, int high){
 //random pivot partition
 int partition_rp(int v[], int v2[], int low, int high)
 {
-  srand(time(NULL));
+  time_t ltime = time(NULL);
+  unsigned int itime = ltime & UINT_MAX;
+  srand(itime);
   int random = low + rand() % (high - low);
   swap_vals(&(v[random]), &(v[high]));
   if(v2 != NULL) {

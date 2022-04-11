@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
       {
+        "type": "bashdb",
+        "request": "launch",
+        "name": "Bash-Debug (test sh)",
+        "cwd": "${workspaceFolder}",
+        "program": "${workspaceFolder}/tools/simple_hydrog/test.sh",
+        "args": []
+      },
+      {
         "name": "(gdb) Launch mppnccombine",
         "type": "cppdbg",
         "request": "launch",

@@ -138,13 +138,30 @@ void check_value_debug(double v){
     }
 }
 
-void print_polygon_x(char* str, double* x, double* y, int n, double xoff, double yoff) {
-  printf("%s\n", str);
+/* print the input polygon , one line per vertex, format
+   <lat, lon>  degrees. String str is printed as first line.
+   Note str is printed as 1st line, and with a # sign in front.
+*/
+void print_polygon_ll(char* str, double* x, double* y, int n, double xoff, double yoff) {
+  printf("#%s\n", str);
   for (int i = 0; i < n; i++) {
-    printf("%15.11f, %15.11f \n", x[i] * R2D + xoff, y[i] * R2D + yoff);
+    printf("<%15.11f, %15.11f>\n", x[i] * R2D + xoff, y[i] * R2D + yoff);
   }
 }
 
+
+/* print the input polygon as <x, y, z> coordinate values, scaled
+  by factor 'scale'. String `str` is printed as first line
+  and with a # sign in front.
+ */
+void print_polygon_xyz(char* str, double* x, double* y, int n, double scale) {
+  double r[3];
+  printf("#%s\n", str);
+  for (int i = 0; i < n; i++) {
+    latlon2xyz(1, &x[i], &y[i], &r[0], &r[1], &r[2]);
+    printf("<%g, %g, %g>\n", scale * r[0], scale * r[1], scale * r[2]);
+  }
+}
 
 /*********************************************************************
 
@@ -516,7 +533,6 @@ double poly_area(const double xo[], const double yo[], int n) {
   double yr[8]; //rotated lat
 
   area_se = se_area(xo, yo, n);
-  area_pa = poly_area_original(xo, yo, n);
 
   //anything near enough to the pole gets rotated tested for area.
   pole = is_near_pole(xo, yo, n);
@@ -531,15 +547,6 @@ double poly_area(const double xo[], const double yo[], int n) {
     }
     rotate_poly(xo, yo, n, xr, yr);
 
-    //rotate_poly_simple_away(xo, yo, n, xr, yr);
-    //if(check_in_gcs(xr, yr, n) == 1){
-    // printf( "poly outside gcs before fix_lon\n");
-   // }
-    //fix_lon(xr, yr, n, M_PI);
-    //if(check_in_gcs(xr, yr, n) == 1){
-    //  printf( "poly outside gcs after fix_lon\n");
-    //}
-
     int pole2 = is_near_pole(xr, yr, n);
     if (pole2 == 1) {
       error_handler("poly_area: pole2 == 1");
@@ -552,9 +559,17 @@ double poly_area(const double xo[], const double yo[], int n) {
     printf("rotated  poly:\n");
      v_print(xr, yr, n);
     printf("--------->\n");
-
-
+  }else{
+     area_pa = poly_area_original(xo, yo, n);
   }
+
+  if(pole == 1){
+    return area_par;
+  }else{
+    return area_pa;
+  }
+}
+
 /*
   if (pole == 1) {
     printf("poly_area : Poly near pole. Poly is:\n");
@@ -581,14 +596,6 @@ double poly_area(const double xo[], const double yo[], int n) {
       pole, fix_lon_strategy, area_pa,area_se, area_par, area_ser);
   }
 */
-  if(pole == 1){
-    check_value_debug( area_par );
-    return area_par;
-  }else{
-    check_value_debug( area_pa );
-    return area_pa;
-  }
-}
 
 double poly_area_original(const double x[], const double y[], int n ) {
   double area = 0.0;
