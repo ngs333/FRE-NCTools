@@ -95,7 +95,7 @@ void get_grid_area(const int *nlon, const int *nlat, const double *lon, const do
     area[j*nx+i] = poly_area(x_in, y_in, n_in);
   }
 
-};  /* get_grid_area */
+}  /* get_grid_area */
 
 #ifndef __AIX
 void get_grid_great_circle_area_(const int *nlon, const int *nlat, const double *lon, const double *lat, double *area)
@@ -109,7 +109,6 @@ void get_grid_great_circle_area(const int *nlon, const int *nlat, const double *
 {
   int nx, ny, nxp, nyp, i, j, n_in;
   int n0, n1, n2, n3;
-  double x_in[20], y_in[20], z_in[20];
   struct Node *grid=NULL;
   double *x=NULL, *y=NULL, *z=NULL;
 
@@ -144,7 +143,7 @@ void get_grid_great_circle_area(const int *nlon, const int *nlat, const double *
   free(y);
   free(z);
 
-};  /* get_grid_great_circle_area */
+}  /* get_grid_great_circle_area */
 
 
 void get_grid_area_dimensionless(const int *nlon, const int *nlat, const double *lon, const double *lat, double *area)
@@ -169,7 +168,7 @@ void get_grid_area_dimensionless(const int *nlon, const int *nlat, const double 
     area[j*nx+i] = poly_area_dimensionless(x_in, y_in, n_in);
   }
 
-};  /* get_grid_area */
+  }  /* get_grid_area */
 
 
 
@@ -195,7 +194,7 @@ void get_grid_area_no_adjust(const int *nlon, const int *nlat, const double *lon
     area[j*nx+i] = poly_area_no_adjust(x_in, y_in, n_in);
   }
 
-};  /* get_grid_area_no_adjust */
+}  /* get_grid_area_no_adjust */
 
 /*******************************************************************************
   void create_xgrid_1dx2d_order1
@@ -213,7 +212,7 @@ int create_xgrid_1dx2d_order1_(const int *nlon_in, const int *nlat_in, const int
 			       i_in, j_in, i_out, j_out, xgrid_area);
   return nxgrid;
 
-};
+}
 
 int create_xgrid_1dx2d_order1(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out, const double *lon_in,
 			      const double *lat_in, const double *lon_out, const double *lat_out,
@@ -298,7 +297,7 @@ int create_xgrid_1dx2d_order1(const int *nlon_in, const int *nlat_in, const int 
 
   return nxgrid;
 
-}; /* create_xgrid_1dx2d_order1 */
+} /* create_xgrid_1dx2d_order1 */
 
 
 /********************************************************************************
@@ -317,7 +316,7 @@ int create_xgrid_1dx2d_order2_(const int *nlon_in, const int *nlat_in, const int
                                      j_in, i_out, j_out, xgrid_area, xgrid_clon, xgrid_clat);
   return nxgrid;
 
-};
+}
 int create_xgrid_1dx2d_order2(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out,
 			      const double *lon_in, const double *lat_in, const double *lon_out, const double *lat_out,
 			      const double *mask_in, int *i_in, int *j_in, int *i_out, int *j_out,
@@ -398,7 +397,7 @@ int create_xgrid_1dx2d_order2(const int *nlon_in, const int *nlat_in, const int 
 
   return nxgrid;
 
-}; /* create_xgrid_1dx2d_order2 */
+} /* create_xgrid_1dx2d_order2 */
 
 /*******************************************************************************
   void create_xgrid_2dx1d_order1
@@ -418,7 +417,7 @@ int create_xgrid_2dx1d_order1_(const int *nlon_in, const int *nlat_in, const int
 			       i_in, j_in, i_out, j_out, xgrid_area);
   return nxgrid;
 
-};
+}
 int create_xgrid_2dx1d_order1(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out, const double *lon_in,
 			      const double *lat_in, const double *lon_out, const double *lat_out,
 			      const double *mask_in, int *i_in, int *j_in, int *i_out,
@@ -498,7 +497,7 @@ int create_xgrid_2dx1d_order1(const int *nlon_in, const int *nlat_in, const int 
 
   return nxgrid;
 
-}; /* create_xgrid_2dx1d_order1 */
+} /* create_xgrid_2dx1d_order1 */
 
 
 /********************************************************************************
@@ -518,7 +517,7 @@ int create_xgrid_2dx1d_order2_(const int *nlon_in, const int *nlat_in, const int
                                      j_in, i_out, j_out, xgrid_area, xgrid_clon, xgrid_clat);
   return nxgrid;
 
-};
+}
 
 int create_xgrid_2dx1d_order2(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out,
 			      const double *lon_in, const double *lat_in, const double *lon_out, const double *lat_out,
@@ -604,7 +603,7 @@ int create_xgrid_2dx1d_order2(const int *nlon_in, const int *nlat_in, const int 
 
   return nxgrid;
 
-}; /* create_xgrid_2dx1d_order2 */
+} /* create_xgrid_2dx1d_order2 */
 
 /*******************************************************************************
   void create_xgrid_2DX2D_order1
@@ -625,7 +624,7 @@ int create_xgrid_2dx2d_order1_(const int *nlon_in, const int *nlat_in, const int
 			       i_in, j_in, i_out, j_out, xgrid_area);
   return nxgrid;
 
-};
+}
 #endif
 int create_xgrid_2dx2d_order1(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out,
 			      const double *lon_in, const double *lat_in, const double *lon_out, const double *lat_out,
@@ -875,7 +874,7 @@ nxgrid = 0;
 
   return nxgrid;
 
-};/* get_xgrid_2Dx2D_order1 */
+}/* get_xgrid_2Dx2D_order1 */
 
 /********************************************************************************
   void create_xgrid_2dx1d_order2
@@ -895,7 +894,7 @@ int create_xgrid_2dx2d_order2_(const int *nlon_in, const int *nlat_in, const int
                                      j_in, i_out, j_out, xgrid_area, xgrid_clon, xgrid_clat);
   return nxgrid;
 
-};
+}
 #endif
 int create_xgrid_2dx2d_order2(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out,
 			      const double *lon_in, const double *lat_in, const double *lon_out, const double *lat_out,
@@ -1156,7 +1155,7 @@ nxgrid = 0;
 
   return nxgrid;
 
-};/* get_xgrid_2Dx2D_order2 */
+}/* get_xgrid_2Dx2D_order2 */
 
 
 /*******************************************************************************
@@ -1262,15 +1261,36 @@ int clip(const double lon_in[], const double lat_in[], int n_in, double ll_lon, 
     inside_last = inside;
   }
   return(i_out);
-}; /* clip */
+} /* clip */
 
+
+int clip_2dx2d(const double lon1[], const double lat1[], int n1,
+  const double lon2[], const double lat2[], int n2,
+  double lon_out[], double lat_out[]) {
+
+  if ((is_near_pole(lon1, lat1, n1) == 1) ||
+   (is_near_pole(lon2, lat2, n2) == 1)) {
+    double lon1_r[8], lat1_r[8], lon2_r[8], lat2_r[8], lon_r[8], lat_r[8];
+    rotate_poly(lon1, lat1, n1, lon1_r, lat1_r);
+    rotate_poly(lon2, lat2, n2, lon2_r, lat2_r);
+    int nc = clip_2dx2d_sh(lon1_r, lat1_r, n1, lon2_r, lat2_r, n2,
+      lon_r, lat_r);
+    rotate_poly_inv(lon_r, lat_r, nc, lon_out, lat_out);
+    return nc;
+  }
+  else {
+    int nc = clip_2dx2d_sh(lon1, lat1, n1, lon2, lat2, n2,
+      lon_out, lat_out);
+    return nc;
+  }
+}
 
 /*******************************************************************************
    Revise Sutherland-Hodgeman algorithm to find the vertices of the overlapping
    between any two grid boxes. It return the number of vertices for the exchange grid.
 *******************************************************************************/
 
-int clip_2dx2d(const double lon1_in[], const double lat1_in[], int n1_in,
+int clip_2dx2d_sh(const double lon1_in[], const double lat1_in[], int n1_in,
   const double lon2_in[], const double lat2_in[], int n2_in,
   double lon_out[], double lat_out[])
 {
@@ -1367,7 +1387,7 @@ int create_xgrid_great_circle_(const int *nlon_in, const int *nlat_in, const int
 			      mask_in, i_in, j_in, i_out, j_out, xgrid_area, xgrid_clon, xgrid_clat);
 
   return nxgrid;
-};
+}
 #endif
 
 int create_xgrid_great_circle(const int *nlon_in, const int *nlat_in, const int *nlon_out, const int *nlat_out,
@@ -1470,7 +1490,7 @@ int create_xgrid_great_circle(const int *nlon_in, const int *nlat_in, const int 
 
   return nxgrid;
 
-};/* create_xgrid_great_circle */
+}/* create_xgrid_great_circle */
 
 /*******************************************************************************
    Revise Sutherland-Hodgeman algorithm to find the vertices of the overlapping
@@ -2259,7 +2279,7 @@ double grid_box_radius(const double *x, const double *y, const double *z, int n)
 
   return (radius);
 
-}; /* grid_box_radius */
+} /* grid_box_radius */
 
 /*******************************************************************************
   double dist_between_boxes(const double *x1, const double *y1, const double *z1, int n1,
@@ -2283,7 +2303,7 @@ double dist_between_boxes(const double *x1, const double *y1, const double *z1, 
   dist = sqrt(dist);
   return (dist);
 
-}; /* dist_between_boxes */
+} /* dist_between_boxes */
 
 /*******************************************************************************
  int inside_edge(double x0, double y0, double x1, double y1, double x, double y)
@@ -2302,7 +2322,7 @@ int inside_edge(double x0, double y0, double x1, double y1, double x, double y)
    product = ( x-x0 )*(y1-y0) + (x0-x1)*(y-y0);
    return (product<=SMALL) ? 1:0;
 
- }; /* inside_edge */
+ } /* inside_edge */
 
 
 /* The following is a test program to test subroutines in create_xgrid.c */

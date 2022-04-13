@@ -877,10 +877,8 @@ double se_area(const double x[], const double y[], const int n){
 }
 
  /* Rotate 45 degrees bout axis <1,1,1>/sqrt(3) */
-void rotate_point_ra( double rv[]){
-  double m [3][3];
+void rotate_point_ra( double rv[], double m[3][3]){
   double v[3];
-  get_rotation_matrix(m);
 
   for(int i = 0; i < 3; i++){
     v[i] = 0.0;
@@ -893,34 +891,72 @@ void rotate_point_ra( double rv[]){
   }
 }
 
-void get_rotation_matrix(double m[3][3]){
-  double c = cos(M_PI_4);
-  double s = sin(M_PI_4);
-  double u = 1.0 / sqrt(3.0);
-  double u2 = u * u;
 
-  m[0][0] = c + (1.0 - c) * u2;
-  m[0][1] = (1.0 - c) * u2 - s * u;
-  m[0][2] = (1.0 - c) * u2 + s * u;
+void get_rotation_matrix(double rm[3][3]){
+  const static double c = cos(M_PI_4);
+  const static double s = sin(M_PI_4);
+  const static double u = 1.0 / sqrt(3.0);
+  const static double u2 = u * u;
 
-  m[1][0] = m[0][2];
-  m[1][1] = m[0][0];
-  m[1][2] = m[0][1];
+  const static double m00 = c + (1.0 - c) * u2;
+  const static double m01 = (1.0 - c) * u2 - s * u;
+  const static double m02 = (1.0 - c) * u2 + s * u;
 
-  m[2][0] = m[0][1];
-  m[2][1] = m[0][2];
-  m[2][2] = m[0][0];
+  const static double m[3][3] ={{m00, m01, m02}, {m02, m00, m01},{m01, m02, m00}};
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      rm[i][j] = m[i][j];
+    }
+  }
 
 }
+
+get_rotation_matrix_inv(double rm[3][3]){
+  const static double c = cos(M_PI_4);
+  const static double s = sin(M_PI_4);
+  const static double u = 1.0 / sqrt(3.0);
+  const static double u2 = u * u;
+
+  const static double m00 = c + (1.0 - c) * u2;
+  const static double m10 = (1.0 - c) * u2 - s * u;
+  const static double m20 = (1.0 - c) * u2 + s * u;
+
+  const static double m[3][3]={{m00, m20, m10},{m10, m00, m20},{m20, m10, m00}};
+for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      rm[i][j] = m[i][j];
+    }
+  }
+}
+
+
 
 void rotate_poly(const double x[], const double y[], const int n, double xr[], double yr[]){
   double area;
   double sv[2]; //a rotated lat/lon
   double rv[3]; //rotated xyz point
-
+  double rm[3][3];
+  get_rotation_matrix(rm);
   for(int i = 0; i < n; i++){
     latlon2xyz(1, &x[i], &y[i], &rv[0], &rv[1], &rv[2]);
-    rotate_point_ra(rv);
+    rotate_point_ra(rv, rm);
+    xyz2latlon(1, &rv[0], &rv[1], &rv[2], &sv[0], &sv[1]);
+    xr[i] = sv[0];
+    yr[i] = sv[1];
+  }
+}
+
+void rotate_poly_inv(const double x[], const double y[], const int n, double xr[], double yr[]){
+  double area;
+  double sv[2]; //a rotated lat/lon
+  double rv[3]; //rotated xyz point
+  double rm[3][3];
+  get_rotation_matrix(rm);
+
+   for(int i = 0; i < n; i++){
+    latlon2xyz(1, &x[i], &y[i], &rv[0], &rv[1], &rv[2]);
+    rotate_point_ra(rv, rm);
     xyz2latlon(1, &rv[0], &rv[1], &rv[2], &sv[0], &sv[1]);
     xr[i] = sv[0];
     yr[i] = sv[1];

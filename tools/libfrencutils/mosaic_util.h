@@ -50,6 +50,10 @@ struct Node{
   struct Node *Next;
 };
 
+typedef struct {
+ int m[3][3];
+} mat33;
+
 
 void error_handler(const char *msg);
 int nearest_index(double value, const double *array, int ia);
@@ -122,10 +126,13 @@ void print_polygon_xyz(char * str, double* x, double* y, int n, double scale);
 int is_near_pole(const double x[], const double y[], int n);
 int crosses_pole(const double x[], const double y[], int n);
 double se_area(const double x[], const double y[], const int n);
-void rotate_point_ra( double rv[]);
+void rotate_point_ra( double rv[], double m[3][3]);
 void rotate_poly(const double x[], const double y[], const int n,
   double xr[], double yr[]);
+void rotate_poly_inv(const double x[], const double y[], const int n,
+  double xr[], double yr[]);
 void get_rotation_matrix(double m[3][3]);
+void get_rotation_matrix_inv(double m[3][3]);
 void set_reproduce_siena_true(void);
 
 
