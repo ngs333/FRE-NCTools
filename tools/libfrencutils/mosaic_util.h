@@ -37,6 +37,7 @@
 #define min(a,b) (a<b ? a:b)
 #define max(a,b) (a>b ? a:b)
 #define SMALL_VALUE ( 1.e-10 )
+
 struct Node{
   double x, y, z, u, u_clip;
   int intersect; /* indicate if this point is an intersection, 0 = no, 1= yes, 2=both intersect and vertices */
@@ -48,6 +49,7 @@ struct Node{
   struct Node *Next;
 };
 
+typedef enum {FULL_FIX = 1, LON_FIX, NO_FIX} LonFixStrategy;
 
 void error_handler(const char *msg);
 int nearest_index(double value, const double *array, int ia);
@@ -59,6 +61,9 @@ void latlon2xyz(int size, const double *lon, const double *lat, double *x, doubl
 void xyz2latlon(int size, const double *x, const double *y, const double *z, double *lon, double *lat);
 double box_area(double ll_lon, double ll_lat, double ur_lon, double ur_lat);
 double poly_area(const double lon[], const double lat[], int n);
+
+double poly_area_original(const double lon[], const double lat[], int n );
+
 double poly_area_dimensionless(const double lon[], const double lat[], int n);
 double poly_area_no_adjust(const double x[], const double y[], int n);
 int fix_lon(double lon[], double lat[], int n, double tlon);
@@ -112,6 +117,26 @@ void setCoordinate(struct Node *node, double x, double y, double z);
 void setInbound(struct Node *interList, struct Node *list);
 int isInside(struct Node *node);
 void set_reproduce_siena_true(void);
+
+
+int areApproxEqual(double a, double b, double delta);
+int areApproxEqualPct(double a, double b, double pct);
+int areApproxEqualPctPlus(double a, double b, double pct);
+void check_value_debug(double v);
+void print_polygon_ll(char * str, double* x, double* y, int n, double xoff, double yoff);
+void print_polygon_xyz(char * str, double* x, double* y, int n, double scale);
+int is_near_pole(const double x[], const double y[], int n);
+int crosses_pole(const double x[], const double y[], int n);
+double se_area(const double x[], const double y[], const int n);
+void rotate_point_ra( double rv[], double m[3][3]);
+void rotate_poly(const double x[], const double y[], const int n,
+  double xr[], double yr[]);
+void rotate_poly_inv(const double x[], const double y[], const int n,
+  double xr[], double yr[]);
+void get_rotation_matrix(double m[3][3]);
+void get_rotation_matrix_inv(double m[3][3]);
+void set_reproduce_siena_true(void);
+
 
 
 #endif
