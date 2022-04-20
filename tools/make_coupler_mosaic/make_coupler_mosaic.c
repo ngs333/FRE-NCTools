@@ -622,9 +622,9 @@ int main(int argc, char* argv[])
             }
           }
         }
-        if (n == 2) {
-          printf("area_atm for n=2 (tile 3) i = j = 24:area=%g\n",
-            area_atm[2][24 * nxa[2] + 24]);
+        if (n == 5) {
+          printf("area_atm for n=5 (tile 5) i 21 ; j = 226:area=%g\n",
+            area_atm[2][26 * nxa[2] + 21]);
         }
       }
     }
@@ -848,16 +848,15 @@ int main(int argc, char* argv[])
           assumption of one-tile ocean. Also we assume the latitude is the along j=0
       */
       if (ntile_ocn == 1) {
-        int is_uniform;
-
         /* check if the latitude is uniform or not at j=1 */
-        is_uniform = 1;
+        int is_uniform = 1;
         for (i = 1; i <= nxo[n]; i++) {
           if (tmpy[i] != tmpy[i - 1]) {
             is_uniform = 0;
           }
         }
-        if (!is_uniform && mpp_pe() == mpp_root_pe()) printf("\nNOTE from make_coupler_mosaic: ocean grid latitude is not uniform along j = 1\n");
+        if (!is_uniform && mpp_pe() == mpp_root_pe())
+          printf("\nNOTE from make_coupler_mosaic: ocean grid latitude is not uniform along j = 1\n");
 
         /* calculate the minimum of latitude of atmosphere grid */
         min_atm_lat = -90. * D2R;
@@ -1096,7 +1095,6 @@ int main(int argc, char* argv[])
     same_mosaic = 1;
   }
 
-  //MZ
   /***************************************************************************************
      First generate the exchange grid between atmos mosaic and land/ocean mosaic
   ***************************************************************************************/
@@ -1205,9 +1203,7 @@ int main(int argc, char* argv[])
       }
     }
 
-    //MZ
     if (print_memory)print_mem_usage("before calculating exchange grid");
-
 
     time_start = time(NULL);
     for (na = 0; na < ntile_atm; na++) {
@@ -1356,12 +1352,13 @@ int main(int argc, char* argv[])
       double axo_area_sum_db = 0.0;
 
       for (la = is; la <= ie; la++) {
-        if(na == 2 && la == 1176){
-          printf("Setting dflag to 1. in 1176 in na=2");
+        if(na == 5 && la == 1269){
+          //if(na == 2 && la == 1176){
+          printf("Setting dflag to 1. in 1269 in na=5");
           dflag = 1;
         }
-        if(dflag == 1 && la > 1176){
-          printf("Setting dflag to 0. la > 1776");
+        if(dflag == 1 && la > 1269){
+          printf("Setting dflag to 0. la > 1269");
           dflag = 0;
         }
 
@@ -1453,11 +1450,12 @@ int main(int argc, char* argv[])
               xl[3] = xlnd[nl][n3]; yl[3] = ylnd[nl][n3];
               if (print_grid)
                 print_polygon_ll("land grid is:", xl, yl, 4, 0.0, 0.0);
-              //if (dflag == 1)
-              //  print_polygon_ll("land grid is:", xl, yl, 4, 0.0, 0.0);
               yl_min = minval_double(4, yl);
               yl_max = maxval_double(4, yl);
-              if (yl_min >= ya_max || yl_max <= ya_min) continue;
+              if (yl_min >= ya_max || yl_max <= ya_min){
+                 if(dflag != 1)
+                  continue;
+                 }
               nl_in = fix_lon(xl, yl, 4, xa_avg);
               xl_min = minval_double(nl_in, xl);
               xl_max = maxval_double(nl_in, xl);
@@ -1465,12 +1463,18 @@ int main(int argc, char* argv[])
                   consider cyclic condition
               */
 
-              if (xa_min >= xl_max || xa_max <= xl_min) continue;
+              if (xa_min >= xl_max || xa_max <= xl_min) {
+               if(dflag != 1)
+                  continue;
+              }
               if (lnd_same_as_atm) {
                 if (na == nl && ja == jl && ia == il) {
                   if (na_in != nl_in) {
                     printf("Error: LND and AM grids are the same but na_in != nl_in, n_out,%d,%d,%d", na_in, nl_in, n_out);
-                    mpp_error("make_coupler_mosaic: inconsistent number of grid box coreners");
+                    mpp_error("make_coupler_mosaic: inconsistent number of grid box corners");
+                  }else{
+                   if(dflag == 1)
+                    print_polygon_ll("land grid is:", xl, yl, 4, 0, 0);
                   }
                   n_out = nl_in;
                   for (int n = 0; n < n_out; n++) {
@@ -1489,8 +1493,10 @@ int main(int argc, char* argv[])
             if (n_out > 0) {
               if (clip_method == GREAT_CIRCLE_CLIP)
                 xarea = great_circle_area(n_out, x_out, y_out, z_out);
-              else
+              else{
                 xarea = poly_area(x_out, y_out, n_out);
+                if(dflag == 1) poly_area_b(x_out, y_out, n_out);
+              }
 
               if(dflag == 1)
                  printf("xarea=%g\n",xarea);
@@ -1517,16 +1523,6 @@ int main(int argc, char* argv[])
                 printf("\n");
               }
               if (xarea / min_area > area_ratio_thresh) {
-
-                if (print_grid || dflag == 1) {
-                  double xtmp[20], ytmp[20];
-                  printf("n_axl is %d\n", n_out);
-                  /* convert to lon-lat */
-                  xyz2latlon(n_out, x_out, y_out, z_out, xtmp, ytmp);
-                  for (int n = 0; n < n_out; n++)
-                  printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
-                }
-
                 axl_i[count] = il;
                 axl_j[count] = jl;
                 axl_t[count] = nl;
@@ -1599,10 +1595,10 @@ int main(int argc, char* argv[])
               xo[3] = xocn[no][n3]; yo[3] = yocn[no][n3];
               //if (print_grid)
               //  print_polygon_ll("ocean grid:", xo, yo, 4,  360.0, 0.0);
-              //if( dflag == 1 && is_near_pole(xo, yo, 4) ){
-              //  printf("ocean grid bf jo io : %d %d", jo, io);
-              //  print_polygon_ll("\nocean grid bf:", xo, yo, 4,  360.0, 0.0);
-              //}
+              if( dflag == 1 && is_near_pole(xo, yo, 4) ){
+                //printf("ocean grid bf jo io : %d %d", jo, io);
+                //print_polygon_ll("\nocean grid bf:", xo, yo, 4,  360.0, 0.0);
+              }
               yo_min = minval_double(4, yo);//TODO: Note lat min/max is calc before lon_fix
               yo_max = maxval_double(4, yo);
               no_in = fix_lon(xo, yo, 4, xa_avg);
@@ -1624,7 +1620,11 @@ int main(int argc, char* argv[])
                   x_out, y_out, z_out);
               }
               else {
-                if (xa_min >= xo_max || xa_max <= xo_min || yo_min >= ya_max || yo_max <= ya_min) continue;
+                //gating check
+                if (xa_min >= xo_max || xa_max <= xo_min || yo_min >= ya_max || yo_max <= ya_min){
+                  if(dflag != 1)
+                  continue;
+                }
                 n_out = clip_2dx2d(xa, ya, na_in, xo, yo, no_in, x_out, y_out);
                 if (dflag == 1 && ( is_near_pole(xa, ya, na_in) && is_near_pole(xo, yo, no_in))){
                    printf("\nAC: n_out= %d ocn_frac=%g\n", n_out, ocn_frac);
@@ -1701,58 +1701,69 @@ int main(int argc, char* argv[])
                 if (clip_method == GREAT_CIRCLE_CLIP) {
                   n_out = clip_2dx2d_great_circle(atmxlnd_x[l], atmxlnd_y[l], atmxlnd_z[l], num_v[l], xo, yo, zo, 4,
                     x_out, y_out, z_out);
-                }
-                else {
-                  if (axl_xmin[l] >= xo_max || axl_xmax[l] <= xo_min || axl_ymin[l] >= ya_max || axl_ymax[l] <= ya_min){
-                    continue;
-                  }else{
-                    if (dflag == 1)
-                       printf("calling clip_2dx2d with dflag==1\n");
-                    n_out = clip_2dx2d(atmxlnd_x[l], atmxlnd_y[l], num_v[l], xo, yo, no_in, x_out, y_out);
-                  }
-                }
-                if (n_out == 0 && dflag == 1){
-                   printf(" * n_out==0 from clipping jo io: %d %d\n", jo, io);
-                }
-                if (n_out > 0) {
-                  if (clip_method == GREAT_CIRCLE_CLIP){
+                  if (n_out > 0) {
                     xarea = great_circle_area(n_out, x_out, y_out, z_out) * lnd_frac;
-                  }else {
-                    if (dflag == 1)
-                      printf("calling poly_area with dflag==1\n");
-                    xarea = poly_area(x_out, y_out, n_out) * lnd_frac;
-                  }
-
-                  if(dflag == 1)
-                    printf("* xarea=%g land_frac=%g\n",xarea,lnd_frac);
-
-                  min_area = min(area_lnd[axl_t[l]][axl_j[l] * nxl[axl_t[l]] + axl_i[l]], area_atm[na][la]);
-                  if (xarea / min_area > area_ratio_thresh) {
-
-                    if (print_grid || dflag == 1) {
-                      double xtmp[20], ytmp[20];
-                      printf("num exchange grid between ocean and axl is %d\n", n_out);
-                      xyz2latlon(n_out, x_out, y_out, z_out, xtmp, ytmp);
-                      for (int n = 0; n < n_out; n++) printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
+                    min_area = min(area_lnd[axl_t[l]][axl_j[l] * nxl[axl_t[l]] + axl_i[l]], area_atm[na][la]);
+                    if (xarea / min_area > area_ratio_thresh) {
+                      axl_area[l] += xarea;
                     }
-
-                    axl_area[l] += xarea;
-
-                    if(dflag == 1)
-                      printf("xarea=%g  axl_area[l]=%g\n",xarea, axl_area[l]);
-
                     if (interp_order == 2) {
                       axl_clon[l] += poly_ctrlon(x_out, y_out, n_out, xa_avg) * lnd_frac;
                       axl_clat[l] += poly_ctrlat(x_out, y_out, n_out) * lnd_frac;
                     }
-                  }else{
-                    if (dflag == 1)
-                      printf("* missed adding xarea=%g min_area=%g\n",xarea, min_area);
+                  }
+                  else {
+                    xarea = 0.0;
                   }
                 }
+                else {
+                  //gating test. Note called before fix_lon (same for determining max/mins)
+                  if (axl_xmin[l] >= xo_max || axl_xmax[l] <= xo_min || axl_ymin[l] >= ya_max || axl_ymax[l] <= ya_min) {
+                    if (!is_near_pole(xa, ya, na_in) && !is_near_pole(xo, yo, no_in)) {
+                      continue;
+                    }
+                  }
 
+                  if (dflag == 1) { // && is_near_pole(xo, yo, 4) )
+                    printf("lnd_frac > MIN_AREA_FRAC \n");
+                    //printf("ocean grid bf jo io : %d %d", jo, io);
+                    //print_polygon_ll("\nocean grid bf:", xo, yo, 4, 360.0, 0.0);
+                  }
+                  n_out = clip_2dx2d(atmxlnd_x[l], atmxlnd_y[l], num_v[l], xo, yo, no_in, x_out, y_out);
+                  // if (n_out == 0) printf(" * n_out==0 from clipping jo io: %d %d\n", jo, io);
 
-              }//for(l=0; l<count; l++)
+                  if (n_out >= 2) {
+                    xarea = poly_area(x_out, y_out, n_out) * lnd_frac;
+                    min_area = min(area_lnd[axl_t[l]][axl_j[l] * nxl[axl_t[l]] + axl_i[l]], area_atm[na][la]);
+                    if (xarea / min_area > area_ratio_thresh) {
+                      axl_area[l] += xarea;
+                      if (interp_order == 2) {
+                        axl_clon[l] += poly_ctrlon(x_out, y_out, n_out, xa_avg) * lnd_frac;
+                        axl_clat[l] += poly_ctrlat(x_out, y_out, n_out) * lnd_frac;
+                      }
+
+                      if (dflag == 1) {
+                        double xtmp[20], ytmp[20];
+                        printf("\nAC: n_out lnd_frac | xarea axl_area[l]: %d %g | %g %g \n", n_out, lnd_frac, xarea, axl_area[l]);
+                        //xyz2latlon(n_out, x_out, y_out, z_out, xtmp, ytmp);
+                        //printf("n_out = %d for grid for OCN x ATLxLND:\n", n_out);
+                        //for (int n = 0; n < n_out; n++)
+                       // printf("%15.11f, %15.11f \n", xtmp[n] * R2D, ytmp[n] * R2D);
+                       // if (dflag == 1 && (is_near_pole(atmxlnd_x[l], atmxlnd_y[l], num_v[l]) || is_near_pole(xo, yo, no_in))) {
+                          printf("\nAC: n_out lnd_frac xarea axl_area[l]: %d %g | %g %g \n", n_out, lnd_frac, xarea, axl_area[l]);
+                          print_polygon_ll("#ATMxLND grid cell:", atmxlnd_x[l], atmxlnd_y[l], num_v[l], 0.0, 0.0);
+                          print_polygon_ll("#OCN grid cell:", xo, yo, no_in, 0.0, 0.0);
+                          print_polygon_ll("#ATMxLNDxOCN grid cell:", x_out, y_out, n_out, 0.0, 0.0);
+                          print_polygon_xyz("ATMxLND grid cell:", atmxlnd_x[l], atmxlnd_y[l], num_v[l], 1.0);
+                          print_polygon_xyz("OCN grid cell:", xo, yo, no_in, 1.0);
+                          print_polygon_xyz("ATMxLNDxOCN grid cell:", x_out, y_out, n_out, 1.0);
+                          printf("NEXT\n");
+                      //  }
+                      }
+                    }
+                  }
+                }
+              } //for(l=0; l<count; l++)
             }//if(lnd_frac > MIN_AREA_FRAC)
           }//for(jo = js_ocn[no]; jo <= je_ocn[no]; jo++) for(io = is_ocn[no]; io <= ie_ocn[no]; io++)
         }//for(no=0; no<ntile_ocn; no++) //ATMOS-OCEAN X-GRID CELLS done
@@ -2275,7 +2286,7 @@ int main(int argc, char* argv[])
               ia = gdata_ia[n] - 1;
               int idx = ja * nxa[na] + ia;
               atm_xarea[na][ja * nxa[na] + ia] += gdata_dbl[n];
-              if (na == 3 && idx == 1176){
+              if (na == 5 && idx == 1224 ){
                 printf("* na=%d idx=%d n=%d  gdata_dbl[n]=%g atm_xarea[na][idx]=%g\n", na, idx, n, gdata_dbl[n] ,atm_xarea[na][idx]);
               }
             }
@@ -2402,7 +2413,7 @@ int main(int argc, char* argv[])
               ia = gdata_ia[n] - 1;
               int idx = ja * nxa[na] + ia;
               atm_xarea[na][ja * nxa[na] + ia] += gdata_dbl[n];
-              if (na == 3 && idx == 1176){
+              if (na == 5 && idx == 1224 ){
                 printf("* na=%d idx=%d n=%d  gdata_dbl[n]=%g atm_xarea[na][idx]=%g\n", na, idx, n, gdata_dbl[n] ,atm_xarea[na][idx]);
               }
             }
@@ -2722,14 +2733,18 @@ int main(int argc, char* argv[])
               xo[3] = xocn[no][n3]; yo[3] = yocn[no][n3];
               yo_min = minval_double(4, yo);
               yo_max = maxval_double(4, yo);
-              if (yo_min >= yl_max || yo_max <= yl_min) continue;
+              if (yo_min >= yl_max || yo_max <= yl_min){
+                  continue;
+              }
               no_in = fix_lon(xo, yo, 4, xl_avg);
               xo_min = minval_double(no_in, xo);
               xo_max = maxval_double(no_in, xo);
               /* xo should in the same range as xa after lon_fix, so no need to
            consider cyclic condition
               */
-              if (xl_min >= xo_max || xl_max <= xo_min) continue;
+              if (xl_min >= xo_max || xl_max <= xo_min) {
+                  continue;
+              }
             }
             ocn_frac = omask[no][jo * nxo[no] + io];
             if (clip_method == GREAT_CIRCLE_CLIP) {
@@ -3269,7 +3284,9 @@ int main(int argc, char* argv[])
                   x_out, y_out, z_out);
               }
               else {
-                if (xw_min >= xo_max || xw_max <= xo_min || yw_min >= yo_max || yw_max <= yo_min) continue;
+                if (xw_min >= xo_max || xw_max <= xo_min || yw_min >= yo_max || yw_max <= yo_min){
+                  continue;
+                  }
                 n_out = clip_2dx2d(xw, yw, nw_in, xo, yo, no_in, x_out, y_out);
               }
               if (n_out > 0) {

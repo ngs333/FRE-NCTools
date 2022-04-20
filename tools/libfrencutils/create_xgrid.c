@@ -83,13 +83,13 @@ void get_grid_area(const int *nlon, const int *nlat, const double *lon, const do
     y_in[1] = lat[j*nxp+i+1];
     y_in[2] = lat[(j+1)*nxp+i+1];
     y_in[3] = lat[(j+1)*nxp+i];
-    if (i == 24 && j == 24) {
-      printf("poly_area : 24_24. Poly is:\n");
+    if (i == 21 && j == 26) {
+      printf("poly_area : 21_26. Poly is:\n");
       v_print(x_in, y_in, 4);
     }
     n_in = fix_lon(x_in, y_in, 4, M_PI);
-    if (i == 24 && j == 24) {
-      printf("poly_area : 24_24. Poly is:\n");
+    if (i == 21 && j == 26) {
+      printf("poly_area : 21_26. Poly is:\n");
       v_print(x_in, y_in, n_in);
     }
     area[j*nx+i] = poly_area(x_in, y_in, n_in);
@@ -1314,6 +1314,7 @@ int clip_2dx2d_sh(const double lon1_in[], const double lat1_in[], int n1_in,
   }
   //Some grid boxes near North Pole are clipped wrong (issue #42 )
   //The following heuristic fix seems to work. Why?
+  //TODO: should not be needed if polys are roated away from poles
   if (gttwopi) { pimod(lon_tmp, n1_in);pimod(lon2_tmp, n2_in); }
 
   x2_0 = lon2_tmp[n2_in - 1];

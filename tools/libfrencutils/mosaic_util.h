@@ -63,6 +63,7 @@ double avgval_double(int size, const double *data);
 void latlon2xyz(int size, const double *lon, const double *lat, double *x, double *y, double *z);
 void xyz2latlon(int size, const double *x, const double *y, const double *z, double *lon, double *lat);
 double box_area(double ll_lon, double ll_lat, double ur_lon, double ur_lat);
+void  poly_area_b(const double lon[], const double lat[], int n);
 double poly_area(const double lon[], const double lat[], int n);
 double poly_area_original(const double lon[], const double lat[], int n );
 double poly_area_dimensionless(const double lon[], const double lat[], int n);

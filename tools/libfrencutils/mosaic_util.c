@@ -18,9 +18,9 @@
  * <http://www.gnu.org/licenses/>.
  **********************************************************************/
 
-/**
- * \author Zhi Liang
-*/
+ /**
+  * \author Zhi Liang
+ */
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -40,22 +40,22 @@
 #define EPSLN10 (1.e-10)
 #define EPSLN15 (1.e-15)
 #define EPSLN30 (1.e-30)
-/***********************************************************
-    void error_handler(char *str)
-    error handler: will print out error message and then abort
-***********************************************************/
+ /***********************************************************
+     void error_handler(char *str)
+     error handler: will print out error message and then abort
+ ***********************************************************/
 
-//Functions fix_lon and poly_are chenge their behavioors based on
-// fix_lon_strategy and from_pole_threshold_rad
+ //Functions fix_lon and poly_are chenge their behavioors based on
+ // fix_lon_strategy and from_pole_threshold_rad
 LonFixStrategy fix_lon_strategy = LON_FIX; //lon only fix
 //LonFixStrategy fix_lon_strategy = FULL_FIX; // original_lon_fix  (lon plus)
 //const double from_pole_threshold_rad = -0.1;//negative for never
 //const double from_pole_threshold_rad = 0.174532925; // ten degrees
 //const double from_pole_threshold_rad = 0.043633231; //2.5 deg
 //const double from_pole_threshold_rad =  0.00872665; //0.5 deb
-const double from_pole_threshold_rad =  0.0174533; //1.0 deg
+const double from_pole_threshold_rad = 0.0174533; //1.0 deg
 
-int reproduce_siena = 0;
+int reproduce_siena = 1;
 
 void set_reproduce_siena_true(void)
 {
@@ -63,7 +63,7 @@ void set_reproduce_siena_true(void)
 }
 
 
-void error_handler(const char *msg)
+void error_handler(const char* msg)
 {
   fprintf(stderr, "FATAL Error: %s\n", msg);
 #ifdef use_libMPI
@@ -73,10 +73,11 @@ void error_handler(const char *msg)
 #endif
 } /* error_handler */
 
-int areApproxEqual(double a, double b, double delta){
-  if(fabs( a - b) <= delta){
+int areApproxEqual(double a, double b, double delta) {
+  if (fabs(a - b) <= delta) {
     return 1;
-  }else{
+  }
+  else {
     return 0;
   }
 }
@@ -84,12 +85,12 @@ int areApproxEqual(double a, double b, double delta){
 //coordiinates should be in :
 // lon: (- PI, PI]
 //lat: [-PI/2, PI/2]
-int  check_in_gcs(double x[], double y[], int n ){
-  for(int i = 0; i<n; i++){
+int  check_in_gcs(double x[], double y[], int n) {
+  for (int i = 0; i < n; i++) {
     if (x[i] <= -M_PI || x[i] > M_PI)
-    return 1;
+      return 1;
     if (y[i] < -M_PI_2 || y[i] > M_PI_2)
-    return 1;
+      return 1;
   }
   return 0;
 }
@@ -102,7 +103,7 @@ int areApproxEqualPct(double a, double b, double pct) {
     return 0;
   }
   double pe = (100.0 * fabs(a - b)) / fabs(a);
-  if ( pe <= pct) {
+  if (pe <= pct) {
     return 1;
   }
   else {
@@ -119,8 +120,8 @@ int areApproxEqualPctPlus(double a, double b, double pct) {
   }
   double pe = (100.0 * fabs(a - b)) / fabs(a);
 
-  if ( pe <= pct) {
-   printf("pe eq: %g \n", pe);
+  if (pe <= pct) {
+    printf("pe eq: %g \n", pe);
     return 1;
   }
   else {
@@ -129,13 +130,13 @@ int areApproxEqualPctPlus(double a, double b, double pct) {
 }
 
 
-void check_value_debug(double v){
-    double t = 4.7413e10;
-    //double t = 5.33235e10;
-    if(areApproxEqualPctPlus(v,t, 0.01) == 1){
-      printf("* approx eq: %g %g\n", v ,t);
-      printf("\n");
-    }
+void check_value_debug(double v) {
+  double t = 4.7413e10;
+  //double t = 5.33235e10;
+  if (areApproxEqualPctPlus(v, t, 0.01) == 1) {
+    printf("* approx eq: %g %g\n", v, t);
+    printf("\n");
+  }
 }
 
 /* print the input polygon , one line per vertex, format
@@ -177,7 +178,7 @@ void print_polygon_xyz(char* str, double* x, double* y, int n, double scale) {
      array:  array of data points  (must be monotonically increasing)
      ia   :  size of array.
  ********************************************************************/
-int nearest_index(double value, const double *array, int ia)
+int nearest_index(double value, const double* array, int ia)
 {
   int index, i;
   int keep_going;
@@ -212,8 +213,8 @@ int nearest_index(double value, const double *array, int ia)
 
 /******************************************************************/
 
-void tokenize(const char *const string, const char *tokens, unsigned int varlen,
-              unsigned int maxvar, char *pstring, unsigned int *const nstr)
+void tokenize(const char* const string, const char* tokens, unsigned int varlen,
+  unsigned int maxvar, char* pstring, unsigned int* const nstr)
 {
   size_t i, j, nvar, len, ntoken;
   int found, n;
@@ -266,7 +267,7 @@ void tokenize(const char *const string, const char *tokens, unsigned int varlen,
   double maxval_double(int size, double *data)
   get the maximum value of double array
 *******************************************************************************/
-double maxval_double(int size, const double *data)
+double maxval_double(int size, const double* data)
 {
   int n;
   double maxval;
@@ -286,7 +287,7 @@ double maxval_double(int size, const double *data)
   double minval_double(int size, double *data)
   get the minimum value of double array
 *******************************************************************************/
-double minval_double(int size, const double *data)
+double minval_double(int size, const double* data)
 {
   int n;
   double minval;
@@ -306,7 +307,7 @@ double minval_double(int size, const double *data)
   double avgval_double(int size, double *data)
   get the average value of double array
 *******************************************************************************/
-double avgval_double(int size, const double *data)
+double avgval_double(int size, const double* data)
 {
   int n;
   double avgval;
@@ -324,7 +325,7 @@ double avgval_double(int size, const double *data)
   void latlon2xyz
   Routine to map (lon, lat) to (x,y,z)
 ******************************************************************************/
-void latlon2xyz(int size, const double *lon, const double *lat, double *x, double *y, double *z)
+void latlon2xyz(int size, const double* lon, const double* lat, double* x, double* y, double* z)
 {
   int n;
 
@@ -341,7 +342,7 @@ void latlon2xyz(int size, const double *lon, const double *lat, double *x, doubl
        void xyz2laton(np, p, xs, ys)
    Transfer cartesian coordinates to spherical coordinates
    ----------------------------------------------------------*/
-void xyz2latlon(int np, const double *x, const double *y, const double *z, double *lon, double *lat)
+void xyz2latlon(int np, const double* x, const double* y, const double* z, double* lon, double* lat)
 {
 
   double xx, yy, zz;
@@ -521,24 +522,23 @@ double poly_area_dimensionless(const double x[], const double y[], int n)
    ----------------------------------------------------------------------------*/
 double poly_area(const double xo[], const double yo[], int n) {
   double area_pa = 0.0;
-  double area_se = 0.0;
+  //double area_se = 0.0;
   double area_par = 0.0;
-  double area_ser = 0.0;
+  //double area_ser = 0.0;
   double da = 0;
-  int dflag = 0;
   int pole = 0;
   int crosses = 0;
 
   double xr[8]; //rotated lon
   double yr[8]; //rotated lat
 
-  area_se = se_area(xo, yo, n);
+  //area_se = se_area(xo, yo, n);
 
   //anything near enough to the pole gets rotated tested for area.
   pole = is_near_pole(xo, yo, n);
   crosses = crosses_pole(xo, yo, n);
-  if (crosses == 1 && pole == 0){
-      error_handler("crosses == 1 && pole == 0");
+  if (crosses == 1 && pole == 0) {
+    error_handler("crosses == 1 && pole == 0");
   }
 
   if (pole == 1) {
@@ -551,23 +551,50 @@ double poly_area(const double xo[], const double yo[], int n) {
     if (pole2 == 1) {
       error_handler("poly_area: pole2 == 1");
     }
-    area_ser = se_area(xr, yr, n);
+    //area_ser = se_area(xr, yr, n);
     area_par = poly_area_original(xr, yr, n);
 
     printf("Original poly:\n");
     v_print(xo, yo, n);
     printf("rotated  poly:\n");
-     v_print(xr, yr, n);
+    v_print(xr, yr, n);
     printf("--------->\n");
-  }else{
-     area_pa = poly_area_original(xo, yo, n);
+  }
+  else {
+    area_pa = poly_area_original(xo, yo, n);
   }
 
-  if(pole == 1){
+  if (pole == 1) {
     return area_par;
-  }else{
+  }
+  else {
     return area_pa;
   }
+}
+
+void poly_area_b(const double xo[], const double yo[], int n) {
+  double area_pa = 0.0;
+  double area_se = 0.0;
+  double area_par = 0.0;
+  double area_ser = 0.0;
+
+  double xr[8]; //rotated lon
+  double yr[8]; //rotated lat
+
+  area_se = se_area(xo, yo, n);
+  area_pa = poly_area_original(xo, yo, n);
+
+  rotate_poly(xo, yo, n, xr, yr);
+  area_par = poly_area_original(xr, yr, n);
+  area_ser = se_area(xr, yr, n);
+
+  printf("Original poly:\n");
+  v_print(xo, yo, n);
+  printf("rotated  poly:\n");
+  v_print(xr, yr, n);
+  printf("--------->\n");
+
+  printf("poly areas : se ser pol rpol : %g %g %g %g\n", area_se, area_ser, area_pa, area_par);
 }
 
 /*
@@ -597,13 +624,11 @@ double poly_area(const double xo[], const double yo[], int n) {
   }
 */
 
-double poly_area_original(const double x[], const double y[], int n ) {
+double poly_area_original(const double x[], const double y[], int n) {
   double area = 0.0;
   double da = 0;
-  int dflag = 0;
-  int pole = 0;
 
-  for (int i = 0; i < n; i++){
+  for (int i = 0; i < n; i++) {
     int ip = (i + 1) % n;
     double dx = (x[ip] - x[i]);
     double lat1, lat2;
@@ -623,16 +648,18 @@ double poly_area_original(const double x[], const double y[], int n ) {
       Note in that situation we should extend the if(dx < -M_PI) to if(dx <= -M_PI)
       so the resulting contribution to area is positive.
     */
-    if (fabs(dx + M_PI) < SMALL_VALUE || fabs(dx - M_PI) < SMALL_VALUE){
+    if (fabs(dx + M_PI) < SMALL_VALUE || fabs(dx - M_PI) < SMALL_VALUE) {
       area += M_PI;
-    }else if (fabs(lat1 - lat2) < SMALL_VALUE){ /* cheap area calculation along latitude */
+    }
+    else if (fabs(lat1 - lat2) < SMALL_VALUE) { /* cheap area calculation along latitude */
       da = dx * sin(0.5 * (lat1 + lat2));
       area -= da;
-    }else{
-      if (reproduce_siena){
+    }
+    else {
+      if (reproduce_siena) {
         area += dx * (cos(lat1) - cos(lat2)) / (lat1 - lat2);
       }
-      else{
+      else {
         //This expression is a trig identity with the above reproduce_siena case
         dy = 0.5 * (lat1 - lat2);
         dat = sin(dy) / dy;
@@ -641,12 +668,13 @@ double poly_area_original(const double x[], const double y[], int n ) {
       }
     }
   }
-  if (area < 0){
-    area=  -area * RADIUS * RADIUS;
-  }else{
-    area =  area * RADIUS * RADIUS;
+  if (area < 0) {
+    area = -area * RADIUS * RADIUS;
   }
-    return area;
+  else {
+    area = area * RADIUS * RADIUS;
+  }
+  return area;
 }
 
 double poly_area_no_adjust(const double x[], const double y[], int n) {
@@ -700,8 +728,8 @@ void v_print(double x[], double y[], int n) {
   }
   printf("xyz: --------\n");
   for (int i = 0; i < n; i++) {
-    latlon2xyz(1, &x[i],   &y[i], &r[0], &r[1], &r[2]);
-    printf(" %20g ,%20g,%20g \n", r[0],r[1],r[2]);
+    latlon2xyz(1, &x[i], &y[i], &r[0], &r[1], &r[2]);
+    printf(" %20g ,%20g,%20g \n", r[0], r[1], r[2]);
   }
 }
 
@@ -710,7 +738,7 @@ int fix_lon(double x[], double y[], int n, double tlon) {
   double x_sum, dx;
   int i, nn = n;
 
-  if(fix_lon_strategy == FULL_FIX){
+  if (fix_lon_strategy == FULL_FIX) {
     /* all pole points must be paired */
     /* The reason is poly_area() function needs a contribution equal to the angle (in radians)
      between the sides that connect to the pole. */
@@ -722,7 +750,8 @@ int fix_lon(double x[], double y[], int n, double tlon) {
         if (y[im] == y[i] && y[ip] == y[i]) {
           nn = delete_vtx(x, y, nn, i);
           i--;
-        }else if (y[im] != y[i] && y[ip] != y[i]) {
+        }
+else if (y[im] != y[i] && y[ip] != y[i]) {
           nn = insert_vtx(x, y, nn, i, x[i], y[i]);
           i++;
         }
@@ -771,9 +800,10 @@ int fix_lon(double x[], double y[], int n, double tlon) {
     // Note x[0] is never changed here.
     for (i = 1; i < nn; i++) {
       double dx = x[i] - x[i - 1];
-      if (dx < -M_PI){
+      if (dx < -M_PI) {
         dx = dx + TPI;
-      }else if (dx > M_PI){
+      }
+      else if (dx > M_PI) {
         dx = dx - TPI;
       }
       x[i] = x[i - 1] + dx;
@@ -783,12 +813,14 @@ int fix_lon(double x[], double y[], int n, double tlon) {
     //If the average lon is less than tlon (which is typically Pi or an average itself,
     // then change all longitudes by (+-) 2*Pi.
     dx = (x_sum / nn) - tlon;
-    if (dx < -M_PI){
+    if (dx < -M_PI) {
       for (i = 0; i < nn; i++)
         x[i] += TPI;
-    }else{ if (dx > M_PI)
-      for (i = 0; i < nn; i++)
-        x[i] -= TPI;
+    }
+    else {
+      if (dx > M_PI)
+        for (i = 0; i < nn; i++)
+          x[i] -= TPI;
     }
   }
 
@@ -851,11 +883,11 @@ int crosses_pole(const double x[], const double y[], int n) {
   return has_cl;
 }
 
-double se_area(const double x[], const double y[], const int n){
+double se_area(const double x[], const double y[], const int n) {
   int i;
   double area;
   double v1[3], v2[3], v3[3];
-  double p_ll[2],  p_ul[2], p_lr[2], p_ur[2];
+  double p_ll[2], p_ul[2], p_lr[2], p_ur[2];
   double radius = RADIUS;
 
   i = 3;
@@ -876,33 +908,35 @@ double se_area(const double x[], const double y[], const int n){
 
 }
 
- /* Rotate 45 degrees bout axis <1,1,1>/sqrt(3) */
-void rotate_point_ra( double rv[], double m[3][3]){
+/* Rotate 45 degrees bout axis <1,1,1>/sqrt(3) */
+void rotate_point_ra(double rv[], double m[3][3]) {
   double v[3];
 
-  for(int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++) {
     v[i] = 0.0;
-    for (int j = 0; j<3; j++){
+    for (int j = 0; j < 3; j++) {
       v[i] += m[i][j] * rv[j];
     }
   }
-  for(int i = 0; i < 3; i++){
+  for (int i = 0; i < 3; i++) {
     rv[i] = v[i];
   }
 }
 
 
-void get_rotation_matrix(double rm[3][3]){
-  const static double c = cos(M_PI_4);
-  const static double s = sin(M_PI_4);
-  const static double u = 1.0 / sqrt(3.0);
-  const static double u2 = u * u;
+void get_rotation_matrix(double rm[3][3]) {
+  const static double c = 0;
+  const static double s = 1;
+   const static double is2 = 1.0 /M_SQRT2;
 
-  const static double m00 = c + (1.0 - c) * u2;
-  const static double m01 = (1.0 - c) * u2 - s * u;
-  const static double m02 = (1.0 - c) * u2 + s * u;
+  const static double m00 = 0;
+  const static double m01 = - is2;
+  const static double m02 = is2;
+  const static double m11 = 1.0/2;
+  const static double m12 = 0.5;
 
-  const static double m[3][3] ={{m00, m01, m02}, {m02, m00, m01},{m01, m02, m00}};
+
+  const static double m[3][3] = { {m00, m01, m02}, {m02, m11, m12},{m01, m12, m11} };
 
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -912,7 +946,47 @@ void get_rotation_matrix(double rm[3][3]){
 
 }
 
-get_rotation_matrix_inv(double rm[3][3]){
+get_rotation_matrix_inv(double rm[3][3]) {
+  const static double c = 0;
+  const static double s = 1;
+   const static double is2 = 1.0 /M_SQRT2;
+
+  const static double m00 = 0;
+  const static double m01 = is2;
+  const static double m02 = -is2;
+  const static double m11 = 1.0/2;
+  const static double m12 = 0.5;
+
+  const static double m[3][3] = { {m00, m01, m02},{m02, m11, m12},{m01, m12, m11} };
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      rm[i][j] = m[i][j];
+    }
+  }
+}
+
+
+void get_rotation_matrix_o(double rm[3][3]) {
+  const static double c = cos(M_PI_4);
+  const static double s = sin(M_PI_4);
+  const static double u = 1.0 / sqrt(3.0);
+  const static double u2 = u * u;
+
+  const static double m00 = c + (1.0 - c) * u2;
+  const static double m01 = (1.0 - c) * u2 - s * u;
+  const static double m02 = (1.0 - c) * u2 + s * u;
+
+  const static double m[3][3] = { {m00, m01, m02}, {m02, m00, m01},{m01, m02, m00} };
+
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      rm[i][j] = m[i][j];
+    }
+  }
+
+}
+
+get_rotation_matrix_inv_0(double rm[3][3]) {
   const static double c = cos(M_PI_4);
   const static double s = sin(M_PI_4);
   const static double u = 1.0 / sqrt(3.0);
@@ -922,8 +996,8 @@ get_rotation_matrix_inv(double rm[3][3]){
   const static double m10 = (1.0 - c) * u2 - s * u;
   const static double m20 = (1.0 - c) * u2 + s * u;
 
-  const static double m[3][3]={{m00, m20, m10},{m10, m00, m20},{m20, m10, m00}};
-for (int i = 0; i < 3; i++) {
+  const static double m[3][3] = { {m00, m20, m10},{m10, m00, m20},{m20, m10, m00} };
+  for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
       rm[i][j] = m[i][j];
     }
@@ -932,13 +1006,13 @@ for (int i = 0; i < 3; i++) {
 
 
 
-void rotate_poly(const double x[], const double y[], const int n, double xr[], double yr[]){
+void rotate_poly(const double x[], const double y[], const int n, double xr[], double yr[]) {
   double area;
   double sv[2]; //a rotated lat/lon
   double rv[3]; //rotated xyz point
   double rm[3][3];
   get_rotation_matrix(rm);
-  for(int i = 0; i < n; i++){
+  for (int i = 0; i < n; i++) {
     latlon2xyz(1, &x[i], &y[i], &rv[0], &rv[1], &rv[2]);
     rotate_point_ra(rv, rm);
     xyz2latlon(1, &rv[0], &rv[1], &rv[2], &sv[0], &sv[1]);
@@ -947,14 +1021,14 @@ void rotate_poly(const double x[], const double y[], const int n, double xr[], d
   }
 }
 
-void rotate_poly_inv(const double x[], const double y[], const int n, double xr[], double yr[]){
+void rotate_poly_inv(const double x[], const double y[], const int n, double xr[], double yr[]) {
   double area;
   double sv[2]; //a rotated lat/lon
   double rv[3]; //rotated xyz point
   double rm[3][3];
   get_rotation_matrix(rm);
 
-   for(int i = 0; i < n; i++){
+  for (int i = 0; i < n; i++) {
     latlon2xyz(1, &x[i], &y[i], &rv[0], &rv[1], &rv[2]);
     rotate_point_ra(rv, rm);
     xyz2latlon(1, &rv[0], &rv[1], &rv[2], &sv[0], &sv[1]);
@@ -981,7 +1055,7 @@ void rotate_poly_simple_away(const double x[], const double y[], const int n, do
     }
   }
   else {
-        error_handler("rotate_poly_simple_away");
+    error_handler("rotate_poly_simple_away");
   }
 }
 
@@ -992,7 +1066,7 @@ void rotate_poly_simple_away(const double x[], const double y[], const int n, do
   (the shortest distance between 2 points on a sphere)
   returned in units of meter
   ----------------------------------------------------------------------------*/
-double great_circle_distance(double* p1, double* p2){
+double great_circle_distance(double* p1, double* p2) {
   double dist, beta;
 
   /* This algorithm is not accurate for small distance
@@ -1006,14 +1080,14 @@ double great_circle_distance(double* p1, double* p2){
 } /* great_circle_distance */
 
 /* Compute the great circle area of a polygon on a sphere */
-double great_circle_area(int n, const double* x, const double* y, const double* z){
+double great_circle_area(int n, const double* x, const double* y, const double* z) {
   int i;
   double pnt0[3], pnt1[3], pnt2[3];
   double sum, area;
 
   /* sum angles around polygon */
   sum = 0.0;
-  for (i = 0; i < n; i++){
+  for (i = 0; i < n; i++) {
     /* points that make up a side of polygon */
     pnt0[0] = x[i];
     pnt0[1] = y[i];
@@ -1042,7 +1116,7 @@ double great_circle_area(int n, const double* x, const double* y, const double* 
           \
            p2
  -----------------------------------------------------------------------------*/
-double spherical_angle(const double *v1, const double *v2, const double *v3)
+double spherical_angle(const double* v1, const double* v2, const double* v3)
 {
   double angle;
 #ifndef HAVE_LONG_DOUBLE_WIDER
@@ -1092,8 +1166,8 @@ double spherical_angle(const double *v1, const double *v2, const double *v3)
   on the sphere. Area is computed as the spherical excess
   [area units are m^2]
   ----------------------------------------------------------------------------*/
-double spherical_excess_area(const double *p_ll, const double *p_ul,
-                             const double *p_lr, const double *p_ur, double radius)
+double spherical_excess_area(const double* p_ll, const double* p_ul,
+  const double* p_lr, const double* p_ur, double radius)
 {
   double area, ang1, ang2, ang3, ang4;
   double v1[3], v2[3], v3[3];
@@ -1133,7 +1207,7 @@ double spherical_excess_area(const double *p_ll, const double *p_ul,
     Perform cross products of 3D vectors: e = P1 X P2
     -------------------------------------------------------------------*/
 
-void vect_cross(const double *p1, const double *p2, double *e)
+void vect_cross(const double* p1, const double* p2, double* e)
 {
 
   e[0] = p1[1] * p2[2] - p1[2] * p2[1];
@@ -1147,13 +1221,13 @@ void vect_cross(const double *p1, const double *p2, double *e)
     return cross products of 3D vectors: = P1 X P2
     -------------------------------------------------------------------*/
 
-double dot(const double *p1, const double *p2)
+double dot(const double* p1, const double* p2)
 {
 
   return (p1[0] * p2[0] + p1[1] * p2[1] + p1[2] * p2[2]);
 }
 
-double metric(const double *p)
+double metric(const double* p)
 {
   return (sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]));
 }
@@ -1161,7 +1235,7 @@ double metric(const double *p)
 /* ----------------------------------------------------------------
    make a unit vector
    --------------------------------------------------------------*/
-void normalize_vect(double *e)
+void normalize_vect(double* e)
 {
   double pdot;
   int k;
@@ -1179,7 +1253,7 @@ void normalize_vect(double *e)
   calculate unit vector for latlon in cartesian coordinates
 
   ---------------------------------------------------------------------*/
-void unit_vect_latlon(int size, const double *lon, const double *lat, double *vlon, double *vlat)
+void unit_vect_latlon(int size, const double* lon, const double* lat, double* vlon, double* vlat)
 {
   double sin_lon, cos_lon, sin_lat, cos_lat;
   int n;
@@ -1209,8 +1283,8 @@ void unit_vect_latlon(int size, const double *lon, const double *lat, double *vl
    of the intersection.
    NOTE: the intersection doesn't have to be inside the tri or line for this to return true
 */
-int intersect_tri_with_line(const double *plane, const double *l1, const double *l2, double *p,
-                            double *t)
+int intersect_tri_with_line(const double* plane, const double* l1, const double* l2, double* p,
+  double* t)
 {
 
   long double M[3 * 3], inv_M[3 * 3];
@@ -1218,9 +1292,9 @@ int intersect_tri_with_line(const double *plane, const double *l1, const double 
   long double X[3];
   int is_invert = 0;
 
-  const double *pnt0 = plane;
-  const double *pnt1 = plane + 3;
-  const double *pnt2 = plane + 6;
+  const double* pnt0 = plane;
+  const double* pnt1 = plane + 3;
+  const double* pnt2 = plane + 6;
 
   /* To do intersection just solve the set of linear equations for both
      Setup M
@@ -1296,7 +1370,7 @@ int invert_matrix_3x3(long double m[], long double m_inv[])
 #define MAXNODELIST 100
 #endif
 
-struct Node *nodeList = NULL;
+struct Node* nodeList = NULL;
 int curListPos = 0;
 
 void rewindList(void)
@@ -1305,19 +1379,19 @@ void rewindList(void)
 
   curListPos = 0;
   if (!nodeList)
-    nodeList = (struct Node *)malloc(MAXNODELIST * sizeof(struct Node));
+    nodeList = (struct Node*)malloc(MAXNODELIST * sizeof(struct Node));
   for (n = 0; n < MAXNODELIST; n++)
     initNode(nodeList + n);
 }
 
-struct Node *getNext()
+struct Node* getNext()
 {
-  struct Node *temp = NULL;
+  struct Node* temp = NULL;
   int n;
 
   if (!nodeList)
   {
-    nodeList = (struct Node *)malloc(MAXNODELIST * sizeof(struct Node));
+    nodeList = (struct Node*)malloc(MAXNODELIST * sizeof(struct Node));
     for (n = 0; n < MAXNODELIST; n++)
       initNode(nodeList + n);
   }
@@ -1330,7 +1404,7 @@ struct Node *getNext()
   return (temp);
 }
 
-void initNode(struct Node *node)
+void initNode(struct Node* node)
 {
   node->x = 0;
   node->y = 0;
@@ -1343,10 +1417,10 @@ void initNode(struct Node *node)
   node->initialized = 0;
 }
 
-void addEnd(struct Node *list, double x, double y, double z, int intersect, double u, int inbound, int inside)
+void addEnd(struct Node* list, double x, double y, double z, int intersect, double u, int inbound, int inside)
 {
 
-  struct Node *temp = NULL;
+  struct Node* temp = NULL;
 
   if (list == NULL)
     error_handler("addEnd: list is NULL");
@@ -1387,13 +1461,13 @@ void addEnd(struct Node *list, double x, double y, double z, int intersect, doub
 
 /* return 1 if the point (x,y,z) is added in the list, return 0 if it is already in the list */
 
-int addIntersect(struct Node *list, double x, double y, double z, int intersect, double u1, double u2, int inbound,
-                 int is1, int ie1, int is2, int ie2)
+int addIntersect(struct Node* list, double x, double y, double z, int intersect, double u1, double u2, int inbound,
+  int is1, int ie1, int is2, int ie2)
 {
 
   double u1_cur, u2_cur;
   int i1_cur, i2_cur;
-  struct Node *temp = NULL;
+  struct Node* temp = NULL;
 
   if (list == NULL)
     error_handler("addEnd: list is NULL");
@@ -1452,9 +1526,9 @@ int addIntersect(struct Node *list, double x, double y, double z, int intersect,
   return 1;
 }
 
-int length(struct Node *list)
+int length(struct Node* list)
 {
-  struct Node *cur_ptr = NULL;
+  struct Node* cur_ptr = NULL;
   int count = 0;
 
   cur_ptr = list;
@@ -1486,16 +1560,16 @@ int sameNode(struct Node node1, struct Node node2)
     return 0;
 }
 
-void addNode(struct Node *list, struct Node inNode)
+void addNode(struct Node* list, struct Node inNode)
 {
 
   addEnd(list, inNode.x, inNode.y, inNode.z, inNode.intersect, inNode.u, inNode.inbound, inNode.isInside);
 }
 
-struct Node *getNode(struct Node *list, struct Node inNode)
+struct Node* getNode(struct Node* list, struct Node inNode)
 {
-  struct Node *thisNode = NULL;
-  struct Node *temp = NULL;
+  struct Node* thisNode = NULL;
+  struct Node* temp = NULL;
 
   temp = list;
   while (temp)
@@ -1512,12 +1586,12 @@ struct Node *getNode(struct Node *list, struct Node inNode)
   return thisNode;
 }
 
-struct Node *getNextNode(struct Node *list)
+struct Node* getNextNode(struct Node* list)
 {
   return list->Next;
 }
 
-void copyNode(struct Node *node_out, struct Node node_in)
+void copyNode(struct Node* node_out, struct Node node_in)
 {
 
   node_out->x = node_in.x;
@@ -1531,9 +1605,9 @@ void copyNode(struct Node *node_out, struct Node node_in)
   node_out->isInside = node_in.isInside;
 }
 
-void printNode(struct Node *list, char *str)
+void printNode(struct Node* list, char* str)
 {
-  struct Node *temp;
+  struct Node* temp;
 
   if (list == NULL)
     error_handler("printNode: list is NULL");
@@ -1545,15 +1619,15 @@ void printNode(struct Node *list, char *str)
     if (temp->initialized == 0)
       break;
     printf(" (x, y, z, interset, inbound, isInside) = (%19.15f,%19.15f,%19.15f,%d,%d,%d)\n",
-           temp->x, temp->y, temp->z, temp->intersect, temp->inbound, temp->isInside);
+      temp->x, temp->y, temp->z, temp->intersect, temp->inbound, temp->isInside);
     temp = temp->Next;
   }
   printf("\n");
 }
 
-int intersectInList(struct Node *list, double x, double y, double z)
+int intersectInList(struct Node* list, double x, double y, double z)
 {
-  struct Node *temp;
+  struct Node* temp;
   int found = 0;
 
   temp = list;
@@ -1579,11 +1653,11 @@ int intersectInList(struct Node *list, double x, double y, double z)
    after (x2,y2,z2) is an intersection, if u is greater than the u value of the intersection,
    insert after, otherwise insert before
 */
-void insertIntersect(struct Node *list, double x, double y, double z, double u1, double u2, int inbound,
-                     double x2, double y2, double z2)
+void insertIntersect(struct Node* list, double x, double y, double z, double u1, double u2, int inbound,
+  double x2, double y2, double z2)
 {
-  struct Node *temp1 = NULL, *temp2 = NULL;
-  struct Node *temp;
+  struct Node* temp1 = NULL, * temp2 = NULL;
+  struct Node* temp;
   double u_cur;
   int found = 0;
 
@@ -1675,10 +1749,10 @@ void insertIntersect(struct Node *list, double x, double y, double z, double u1,
   temp->Next = temp2;
 }
 
-double gridArea(struct Node *grid)
+double gridArea(struct Node* grid)
 {
   double x[20], y[20], z[20];
-  struct Node *temp = NULL;
+  struct Node* temp = NULL;
   double area;
   int n;
 
@@ -1709,9 +1783,9 @@ int getInbound(struct Node node)
   return node.inbound;
 }
 
-struct Node *getLast(struct Node *list)
+struct Node* getLast(struct Node* list)
 {
-  struct Node *temp1;
+  struct Node* temp1;
 
   temp1 = list;
   if (temp1)
@@ -1725,9 +1799,9 @@ struct Node *getLast(struct Node *list)
   return temp1;
 }
 
-int getFirstInbound(struct Node *list, struct Node *nodeOut)
+int getFirstInbound(struct Node* list, struct Node* nodeOut)
 {
-  struct Node *temp = NULL;
+  struct Node* temp = NULL;
 
   temp = list;
 
@@ -1744,7 +1818,7 @@ int getFirstInbound(struct Node *list, struct Node *nodeOut)
   return 0;
 }
 
-void getCoordinate(struct Node node, double *x, double *y, double *z)
+void getCoordinate(struct Node node, double* x, double* y, double* z)
 {
 
   *x = node.x;
@@ -1752,7 +1826,7 @@ void getCoordinate(struct Node node, double *x, double *y, double *z)
   *z = node.z;
 }
 
-void getCoordinates(struct Node *node, double *p)
+void getCoordinates(struct Node* node, double* p)
 {
 
   p[0] = node->x;
@@ -1760,7 +1834,7 @@ void getCoordinates(struct Node *node, double *p)
   p[2] = node->z;
 }
 
-void setCoordinate(struct Node *node, double x, double y, double z)
+void setCoordinate(struct Node* node, double x, double y, double z)
 {
 
   node->x = x;
@@ -1772,11 +1846,11 @@ void setCoordinate(struct Node *node, double x, double y, double z)
    this will also set some inbound value of the points in list1
 */
 
-void setInbound(struct Node *interList, struct Node *list)
+void setInbound(struct Node* interList, struct Node* list)
 {
 
-  struct Node *temp1 = NULL, *temp = NULL;
-  struct Node *temp1_prev = NULL, *temp1_next = NULL;
+  struct Node* temp1 = NULL, * temp = NULL;
+  struct Node* temp1_prev = NULL, * temp1_next = NULL;
   int prev_is_inside, next_is_inside;
 
   /* for each point in interList, search through list to decide the inbound value the interList point */
@@ -1820,7 +1894,7 @@ void setInbound(struct Node *interList, struct Node *list)
   }
 }
 
-int isInside(struct Node *node)
+int isInside(struct Node* node)
 {
 
   if (node->isInside == -1)
@@ -1831,12 +1905,12 @@ int isInside(struct Node *node)
 /*  #define debug_test_create_xgrid */
 
 /* check if node is inside polygon list or not */
-int insidePolygon(struct Node *node, struct Node *list)
+int insidePolygon(struct Node* node, struct Node* list)
 {
   int i, ip, is_inside;
   double pnt0[3], pnt1[3], pnt2[3];
   double anglesum;
-  struct Node *p1 = NULL, *p2 = NULL;
+  struct Node* p1 = NULL, * p2 = NULL;
 
   anglesum = 0;
 
@@ -1877,7 +1951,7 @@ int insidePolygon(struct Node *node, struct Node *list)
   return is_inside;
 }
 
-int inside_a_polygon(double *lon1, double *lat1, int *npts, double *lon2, double *lat2)
+int inside_a_polygon(double* lon1, double* lat1, int* npts, double* lon2, double* lat2)
 {
 
   double x2[20], y2[20], z2[20];
@@ -1885,7 +1959,7 @@ int inside_a_polygon(double *lon1, double *lat1, int *npts, double *lon2, double
   double min_x2, max_x2, min_y2, max_y2, min_z2, max_z2;
   int isinside, i;
 
-  struct Node *grid1 = NULL, *grid2 = NULL;
+  struct Node* grid1 = NULL, * grid2 = NULL;
 
   /* first convert to cartesian grid */
   latlon2xyz(*npts, lon2, lat2, x2, y2, z2);
@@ -1927,7 +2001,7 @@ int inside_a_polygon(double *lon1, double *lat1, int *npts, double *lon2, double
 }
 
 #ifndef __AIX
-int inside_a_polygon_(double *lon1, double *lat1, int *npts, double *lon2, double *lat2)
+int inside_a_polygon_(double* lon1, double* lat1, int* npts, double* lon2, double* lat2)
 {
 
   int isinside;
