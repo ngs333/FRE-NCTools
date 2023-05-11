@@ -13,7 +13,10 @@ real, parameter :: lat1= -90., lat2= 90., lon1= 0., lon2= 360.
 real, parameter :: erad= 6.371e+3
 real, parameter :: mval_mdl= -9999.
 
-include '/usr/local/include/netcdf.inc'
+!!TODO:
+!!include '/usr/local/include/netcdf.inc'
+include 'netcdf.inc'
+
 
 integer :: i, j, n, l, rcode, varid, ncid, attnum, id, jd, latid
 integer :: lonid, k, rcode2, ndm, kta, nf
@@ -53,7 +56,7 @@ write (6,*) 'fort.5 data read'
 
 rcode= NF_OPEN (trim(river_input_file(1,1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open river netcdf file"  
+    write (6,*) "ERROR: cannot open river netcdf file"
     write (6,*) trim(river_input_file(1,1))
     stop 1
 endif
@@ -73,7 +76,7 @@ allocate (lat_idx(jd))
 start= 1 ;  count= 1 ;  count(1)= jd
 rcode= nf_get_vara_double (ncid, latid, start, count, lat_idx)
 
-       
+
 rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
 if (rcode /= 0) then
     rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -88,12 +91,12 @@ write (6,*) 'id= ', id
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 rcode= nf_close (ncid)
 
 
 ! ----------------------------------------------------------------------
-! now open river files -- read lat,lon grids, tocell, land_frac, 
+! now open river files -- read lat,lon grids, tocell, land_frac,
 !   cellarea
 ! ----------------------------------------------------------------------
 
@@ -133,8 +136,8 @@ do nf = 1,nfile
 
       start= 1 ;  count(1)= id ;  count(2)= jd
       rcode= nf_get_vara_double (ncid, latid, start, count, lat(:,:,n,nf))
-       
-       
+
+
       rcode= nf_inq_varid (ncid, 'x', lonid)         ! lon field
       if (rcode /= 0) then
           write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -181,7 +184,7 @@ do nf = 1,nfile
           rcode= nf_get_att_double (ncid, varid, 'missing_value', mval_tocell)
       endif
       write (6,*) 'mval= ', mval_tocell
-   
+
       where (tocell(:,:,n,nf) == mval_tocell) tocell(:,:,n,nf)= mval_mdl
 
 
@@ -247,9 +250,9 @@ do nf = 1,nfile
       write (6,*) 'mval= ', mval_cella
 
       where (cell_area(:,:,n,nf) == mval_cella) cell_area(:,:,n,nf)= 0.
-   
+
       rcode= nf_close (ncid)
-   
+
    enddo
 enddo
 
@@ -294,7 +297,7 @@ close (10)
 deallocate (lat_idx, lon_idx)
 deallocate (lat, lon, tocell, land_frac, cell_area)
 
-   
+
 stop
 
 end

@@ -12,6 +12,9 @@ include "param.h"
 integer, parameter :: maxdims= 2
 integer, parameter :: ntilmx= 6
 !integer, parameter :: idr= 5760, jdr= 2880
+!!TODO: where shoudl idr, ijr come from? param.h?
+
+
 integer, parameter :: idrp1= idr+1, jdrp1= jdr+1
 
 real, parameter :: lat1= -90., lat2= 90., lon1= 0., lon2= 360.
@@ -57,7 +60,7 @@ close (5)
 ! ---------------------------------------------------------------------------------------
 rcode= NF_OPEN (trim(river_input_file(1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(river_input_file(1))
     stop 1
 endif
@@ -108,7 +111,7 @@ do n= 1,ntiles
    endif
 
    start= 1 ; count= 1
-   
+
    if (ntiles == 1) then
 !     regular grid
        rcode= nf_inq_varid (ncid, 'lat', latid)         ! number of lats
@@ -126,7 +129,7 @@ do n= 1,ntiles
 
        count(1)= jd
        rcode= nf_get_vara_double (ncid, latid, start, count, lat(:,:,n))
-       
+
        rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
        if (rcode /= 0) then
            rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -144,7 +147,7 @@ do n= 1,ntiles
        rcode= nf_get_vara_double (ncid, lonid, start, count, lon(:,:,n))
 
    else
-   
+
 !     cubic sphere -- assume no edge data
        rcode= nf_inq_varid (ncid, 'y', latid)         ! number of lats
        if (rcode /= 0) then
@@ -162,7 +165,7 @@ do n= 1,ntiles
 
        start= 1 ;  count(1)= id ;  count(2)= jd
        rcode= nf_get_vara_double (ncid, latid, start, count, lat(:,:,n))
-       
+
        rcode= nf_inq_varid (ncid, 'x', lonid)         ! number of lons
        if (rcode /= 0) then
            write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -325,7 +328,7 @@ enddo
 
 deallocate (arlatr)
 
-             
+
 allocate (lndfr_r(idr,jdr), lktau_r(idr,jdr))
 
 lndfr_r= 0. ;  lktau_r= mval_mdl
@@ -348,7 +351,7 @@ do n= 1,ntiles
                     enddo
                 endif
              enddo
-             
+
 170      continue
       enddo
    enddo
@@ -362,7 +365,7 @@ enddo
 write (fname, '(a)') 'river_network.nc'
 rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
 rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -393,32 +396,32 @@ rcode= NF_DEF_VAR (ncid, 'land_frac', NF_DOUBLE, 2, ndims, varid)
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', 13, 'land fraction')
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
 rcode= NF_PUT_ATT_DOUBLE (ncid, varid, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
 rcode= NF_DEF_VAR (ncid, 'lake_tau', NF_DOUBLE, 2, ndims, varid2)
 rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'long_name', 8, 'lake_tau')
 rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'units', 1, 's')
 rcode= NF_PUT_ATT_DOUBLE (ncid, varid2, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
 rcode= NF_DEF_VAR (ncid, 'x', NF_DOUBLE, 2, ndims, longid)
 rcode= NF_PUT_ATT_TEXT (ncid, longid, 'long_name', 20, 'Geographic longitude')
 rcode= NF_PUT_ATT_TEXT (ncid, longid, 'units', 12, 'degrees_east')
- 
+
 rcode= NF_DEF_VAR (ncid, 'y', NF_DOUBLE, 2, ndims, latgid)
 rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'long_name', 19, 'Geographic latitude')
 rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'units', 13, 'degrees_north')
- 
+
 !  leave define mode
 rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
 start= 1 ;  count= 1
-      
+
 count(1)= idr
 rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start, count, lonr)
 
 count(1)= jdr
 rcode= NF_PUT_VARA_DOUBLE (ncid, latid, start, count, latr)
-   
+
 start= 1 ;  count(1)= idr ;  count(2)= jdr
 rcode= NF_PUT_VARA_DOUBLE (ncid, longid, start, count, lonrg)
 

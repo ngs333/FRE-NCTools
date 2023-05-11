@@ -5,7 +5,8 @@ program get_basins
 
 implicit none
 
-include 'param.h'
+!!TODo:
+include 'param_basin.h'
 
 integer, parameter :: maxdims= 3
 integer, parameter :: ni_cells= 3, nj_cells= 3
@@ -16,6 +17,7 @@ real, parameter :: mval_mdl= 1.e+20
 real, parameter :: erad= 6.371e+6
 
 include 'netcdf.inc'
+
 
 integer :: k, n, rcode, varid, i, j, ncid, ktr, id, jd, idp1, jdp1
 integer :: latid, lonid, idp2, jdp2, rcode2, ndm, l, i1, j1, n1, ip
@@ -37,10 +39,11 @@ character(len=4),  dimension (nbasin) :: bshort
 character(len=8),  dimension (nbasin) :: ibas
 character(len=40), dimension (nbasin) :: bname_in
 
-real, dimension (ni_cells,nj_cells)    :: out_flow = &
-    (/  8.,   4.,   2., &
-       16.,   0.,   1., &
-       32.,  64., 128. /)
+real, dimension (ni_cells,nj_cells)    :: out_flow
+!!TODO: Moved down to compile
+!!    (/  8.,   4.,   2., &
+!!      16.,   0.,   1., &
+!!       32.,  64., 128. /)
 
 character(len=9) :: area_var = 'land_area'
 
@@ -56,6 +59,9 @@ real*4, allocatable, dimension (:,:)      :: dat_out2
 
 character(len=4),   allocatable, dimension (:)     :: bname
 character(len=120), allocatable, dimension (:)     :: hydrography_file
+
+out_flow = reshape ((/  8.,   4.,   2., 16.,   0.,   1.,  32.,  64., 128. /), shape (out_flow))
+
 
 iwrt= 337 ; jwrt= 229
 
@@ -85,7 +91,7 @@ close (15)
 !  get lon and lat index dims from first model file
 rcode= NF_OPEN (trim(hydrography_file(1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(hydrography_file(1))
     stop 1
 endif
@@ -124,7 +130,7 @@ write (6,*) 'id= ', id, ', idp1= ', idp1, ', idp2= ', idp2
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 rcode= nf_close (ncid)
 
 ! ----------------------------------------------------------------------
@@ -147,7 +153,7 @@ do n= 1,ntiles
    endif
 
    start= 1 ; count= 1
-   
+
    if (ntiles == 1) then
 ! regular grid
        rcode= nf_inq_varid (ncid, 'lat', latid)         ! number of lats
@@ -168,7 +174,7 @@ do n= 1,ntiles
        do i= 3,idp1
           latm(i,:,:)= latm(2,:,:)
        enddo
-       
+
        rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
        if (rcode /= 0) then
            rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -189,7 +195,7 @@ do n= 1,ntiles
        enddo
 
    else
-   
+
 !     cubic sphere -- assume no edge data
        rcode= nf_inq_varid (ncid, 'y', latid)         ! number of lats
        if (rcode /= 0) then
@@ -211,7 +217,7 @@ do n= 1,ntiles
        if (rcode /= 0) then
            write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
        endif
-       
+
        rcode= nf_inq_vardimid (ncid, lonid, dimids)
        rcode= nf_inq_dimlen (ncid, dimids(1), ndm)
        if (ndm /= id) then
@@ -280,9 +286,9 @@ do n= 1,ntiles
    if (nchar /= len_bname) then
        write (6,*) "ERROR: wrong length of bname text string, ", nchar ; stop 46
    endif
-   
+
    allocate (bname(ngage), ig1(ngage), jg1(ngage))
-   
+
    start= 1 ;  count= 1
    do l= 1,ngage
       start(1)= 1 ;  count(1)= nchar
@@ -320,7 +326,7 @@ do n= 1,ntiles
    enddo
 
    deallocate (bname, ig1, jg1)
-   
+
    rcode= nf_close (ncid)
 enddo
 
@@ -358,7 +364,7 @@ else
        if (its(n) == 0) its(n)= ntiles
        if (itn(n) == 0) itn(n)= ntiles
     enddo
-       
+
     call create_halo (ntiles, id, jd, itw, ite, its, itn, tocell)
     call create_halo (ntiles, id, jd, itw, ite, its, itn, land_frac)
     call create_halo (ntiles, id, jd, itw, ite, its, itn, cellarea)
@@ -389,14 +395,14 @@ do n= 1,ntiles
          if (tocell(i,j,n) == mval_mdl) go to 66
          i1= i ; j1= j ; n1= n
          ktr= 0
-          
+
 65       continue
          do jj= 1,nj_cells
             jp= j1+jj-2
-                
+
             do ii= 1,ni_cells
                ip=i1+ii-2
-                
+
                if (tocell(i1,j1,n1) == out_flow(ii,jj)) then
                    do l= 1,nbasin
                       if (gage_grd(i1,j1,n1,l) > 0) then
@@ -445,16 +451,16 @@ do n= 1,ntiles
                        go to 65
                    endif
                endif
-                
+
             enddo
          enddo
-      
+
 66       continue
       enddo     ! end of i loop
    enddo        ! end of j loop
 enddo           ! end of ntiles loop
 
-       
+
 deallocate (gage_grd)
 
 ktr= 0
@@ -508,15 +514,15 @@ enddo
 
 allocate (bmask(idp2,jdp2))
 allocate (dat_out2(idp2,jdp2))
-   
+
 do n= 1,ntiles
 
    bmask= -1.
    where (land_frac(:,:,n) > 0.) bmask= 0.
-   
+
    do k= 1,nbasin
       if (ncell(k) > 0) then
-          do l= 1,ncell(k) 
+          do l= 1,ncell(k)
              if (nb_cell(l,k) == n) go to 105
           enddo
       endif
@@ -526,7 +532,7 @@ do n= 1,ntiles
 
    do k= 1,nbasin
       if (ncell(k) > 0) then
-          do l= 1,ncell(k) 
+          do l= 1,ncell(k)
              if (nb_cell(l,k) == n) then
                  i= ib_cell(l,k) ;  j= jb_cell(l,k)
                  bmask(i,j)= idx_gage(k)
@@ -534,11 +540,11 @@ do n= 1,ntiles
           enddo
       endif
    enddo
-   
+
    write (fname, '(a,i1,a)') 'basins_NE.tile', n, '.nc'
    rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
    rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -567,22 +573,22 @@ do n= 1,ntiles
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', 13, 'basin at gage')
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
    rcode= NF_PUT_ATT_INT (ncid, varid, 'missing_value', NF_INT, 1, -1)
-   
+
    rcode= NF_DEF_VAR (ncid, 'cellarea', NF_FLOAT, 2, ndims, varid2)
    rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'long_name', 9, 'cell area')
    rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'units', 2, 'm2')
- 
+
    rcode= NF_DEF_VAR (ncid, 'x', NF_DOUBLE, 2, ndims, longid)
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'long_name', 20, 'Geographic longitude')
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'units', 12, 'degrees_east')
- 
+
    rcode= NF_DEF_VAR (ncid, 'y', NF_DOUBLE, 2, ndims, latgid)
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'long_name', 19, 'Geographic latitude')
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'units', 13, 'degrees_north')
- 
+
 !  leave define mode
    rcode= NF_ENDDEF (ncid)
-      
+
    count(1)= id
    rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start, count, lon_idx)
 
@@ -613,7 +619,7 @@ enddo
 
 deallocate (dat_out2)
 deallocate (bmask)
-   
+
 
 
 deallocate (lat_idx, lon_idx)
@@ -650,12 +656,12 @@ else
            do j= 2,jp1
               field(1,j,n)=     field(ip1,j,itw(n))  ! western edge
            enddo
-       
+
            do j= 2,jp1
               i= ip1-j+2
               field(ip2,j,n)=  field(i,2,ite(n))     ! eastern edge
            enddo
-          
+
            do i= 2,ip1
               j= jp1-i+2
               field(i,1,n)=     field(ip1,j,its(n))  ! southern edge
@@ -669,15 +675,15 @@ else
               i= ip1-j+2
               field(1,j,n)=     field(i,jp1,itw(n))  ! western edge
            enddo
-       
+
            do j= 2,jp1
               field(ip2,j,n)=  field(2,j,ite(n))     ! eastern edge
            enddo
-       
+
            do i= 2,ip1
               field(i,1,n)=     field(i,jp1,its(n))  ! southern edge
            enddo
-       
+
            do i= 2,ip1
               j= jp1-i+2
               field(i,jp2,n)=  field(2,j,itn(n))     ! northern edge

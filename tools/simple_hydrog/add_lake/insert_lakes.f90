@@ -1,6 +1,6 @@
 program insert_lakes
 
-! program inserts 1-cell lakes in 0.5x0.5 or 1x1 cover type, ground type files 
+! program inserts 1-cell lakes in 0.5x0.5 or 1x1 cover type, ground type files
 
 implicit none
 
@@ -13,7 +13,10 @@ real, parameter :: erad= 6.371e+3
 real, parameter :: mval_mdl= -9999.
 real, parameter :: res_m45= 2.5
 
-include '/usr/local/include/netcdf.inc'
+!!TODO:
+!!include '/usr/local/include/netcdf.inc'
+include 'netcdf.inc'
+
 
 integer :: i, j, n, l, rcode, varid, ncid, attnum, id, jd, idp1, jdp1
 integer :: latid, lonid, latbid, lonbid, latdim, latbdim, londim
@@ -137,7 +140,7 @@ else if (input_type == 2) then
 
 ! now read grid of data indicating which grid cells need more lake cells
    allocate (lake_dat(id_lake,jd_lake))
-   
+
    open (20, form= 'formatted')
    read (20,*) i1, nip
    read (20,*) j1, njp
@@ -172,7 +175,7 @@ else if (input_type == 2) then
       enddo
    enddo
    nlake= ktr
-   
+
    write (6,*) 'number of lakes in grid= ', nlake
    do n= 1,ktr
       write (6,'(i6,2f9.2,f10.4,i6)') n, lat_lake(n), lon_lake(n), chk_lake(n), ncell_lake(n)
@@ -351,7 +354,7 @@ do l= 1,nlake
 20 continue
 enddo
 
-   
+
 ! ----------------------------------------------------------------------
 !  now insert lake in cover field
 ! ----------------------------------------------------------------------
@@ -407,7 +410,7 @@ endif
 
 rcode= NF_CREATE ('cover_file_lake.nc', NF_CLOBBER, ncid)
 rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', 17, 'cover_file_lake.nc')
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -439,13 +442,13 @@ rcode= NF_DEF_VAR (ncid, 'cover', NF_INT, 2, ndims, varid)
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', len_trim(long_name), trim(long_name))
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
 rcode= NF_PUT_ATT_INT (ncid, varid, 'missing_value', NF_INT, 1, mval_cover)
- 
+
 !  leave define mode
 rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
 start= 1 ;  count= 1
-      
+
 count(1)= id
 rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start(1), count(1), lon)
 
@@ -461,8 +464,8 @@ rcode= NF_CLOSE (ncid)
 
 deallocate (lat, latb, lon, lonb, arlat)
 deallocate (cover, cover_lake)
-   
-   
+
+
 stop
 
 end

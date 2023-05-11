@@ -1,6 +1,6 @@
 program insert_lakes_3D
 
-! program inserts lake-fractions into m45 3D cover type, ground type files 
+! program inserts lake-fractions into m45 3D cover type, ground type files
 
 implicit none
 
@@ -11,7 +11,10 @@ real, parameter :: lat1= -90., lat2= 90., lon1= 0., lon2= 360.
 real, parameter :: erad= 6.371e+3
 real, parameter :: lfrac_const= 0.20
 
-include '/usr/local/include/netcdf.inc'
+!!TODO:
+!!include '/usr/local/include/netcdf.inc'
+include 'netcdf.inc'
+
 
 integer :: i, j, n, l, rcode, varid, ncid, attnum, id, jd, idp1, jdp1
 integer :: latid, lonid, latbid, lonbid, latdim, latbdim, londim
@@ -115,7 +118,7 @@ if (rcode /= 0) then
 endif
 rcode= nf_inq_vardimid (ncid, latid, dimids)
 rcode= nf_inq_dimlen (ncid, dimids(1), jdp1)
-    
+
 allocate (latb(jdp1))
 count(1)= jdp1
 rcode= nf_get_vara_double (ncid, latid, start, count, latb)
@@ -151,7 +154,7 @@ if (rcode /= 0) then
 endif
 rcode= nf_inq_vardimid (ncid, lonid, dimids)
 rcode= nf_inq_dimlen (ncid, dimids(1), idp1)
-    
+
 allocate (lonb(idp1))
 count(1)= idp1
 rcode= nf_get_vara_double (ncid, lonid, start, count, lonb)
@@ -406,7 +409,7 @@ do l= 1,nlake
 20 continue
 enddo
 
-   
+
 ! ----------------------------------------------------------------------
 !  now insert lake fraction in frac_new field
 !    do not alter Caspian fractions -- already present in frac field
@@ -470,7 +473,7 @@ do l= 1,nlake
        if (frac(ilake(l),jlake(l),idx_lake) > 0.) write (6,*) "lake already present at ", &
            lon_lake(l), lat_lake(l)
        frac_new(ilake(l),jlake(l),idx_lake)= lake_area(l)/cell_area(ilake(l),jlake(l))
-       
+
        write (10,'(i4,2f10.2,2f12.0,f15.6)') l, lat_lake(l), lon_lake(l), lake_area(l), &
          cell_area(ilake(l),jlake(l)), lake_area(l)/cell_area(ilake(l),jlake(l))
        if (lake_area(l) > cell_area(ilake(l),jlake(l))) then
@@ -493,7 +496,7 @@ write (6,*) 'Caspian drain point, frac_new= ', frac_new(21,67,idx_lake)
 
 rcode= NF_CREATE ('cover_file_lake.nc', NF_CLOBBER, ncid)
 rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', 17, 'cover_file_lake.nc')
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -551,13 +554,13 @@ rcode= NF_DEF_VAR (ncid, 'frac', NF_FLOAT, 3, ndims, varid)
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', len_trim(long_name), trim(long_name))
 rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
 rcode= NF_PUT_ATT_REAL (ncid, varid, 'missing_value', NF_FLOAT, 1, mval_out)
- 
+
 !  leave define mode
 rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
 start= 1 ;  count= 1
-      
+
 count(1)= id
 rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start(1), count(1), lon)
 
@@ -585,8 +588,8 @@ rcode= NF_CLOSE (ncid)
 deallocate (lat, latb, lon, lonb, zdat, cell_area)
 deallocate (frac, frac_new)
 deallocate (adat3)
-   
-   
+
+
 stop
 
 end

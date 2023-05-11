@@ -69,12 +69,12 @@ close (23)
 
 
 ! ----------------------------------------------------------------------
-!  get lon and lat dims from river file 
+!  get lon and lat dims from river file
 ! ----------------------------------------------------------------------
 
 rcode= NF_OPEN (trim(river_input_file), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open river netcdf file"  
+    write (6,*) "ERROR: cannot open river netcdf file"
     write (6,*) trim(river_input_file)
     stop 1
 endif
@@ -94,7 +94,7 @@ allocate (lat_idx(jd))
 start= 1 ;  count= 1 ;  count(1)= jd
 rcode= nf_get_vara_double (ncid, latid, start, count, lat_idx)
 
-       
+
 rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
 if (rcode /= 0) then
     rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -109,7 +109,7 @@ write (6,*) "id= ", id
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 rcode= nf_close (ncid)
 
 
@@ -149,8 +149,8 @@ endif
 
 start= 1 ;  count(1)= id ;  count(2)= jd
 rcode= nf_get_vara_double (ncid, latid, start, count, lat)
-       
-       
+
+
 rcode= nf_inq_varid (ncid, 'x', lonid)         ! lon field
 if (rcode /= 0) then
     write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -234,7 +234,7 @@ where (cell_area == mval_in) cell_area= 0.
 
 
 rcode= nf_close (ncid)
-   
+
 !write (10,'(/"river lats")')
 !do j= 1,jd
 !   write (10,*) 'j= ', j
@@ -272,11 +272,11 @@ do l= 1,ngage
    lat_rg(l)= lat(1,jgage(l))
    lon_rg(l)= lon(igage(l),1)
 enddo
-   
+
 do l= 1,ngage
    write (6,'(a,2i6,2f10.2)') bshort(l), igage(l), jgage(l), lat_rg(l), lon_rg(l)
 enddo
-   
+
 do l= 1,ngage
    write (10,'(a,2i6,2f10.2)') bshort(l), igage(l), jgage(l), lat_rg(l), lon_rg(l)
 enddo
@@ -289,7 +289,7 @@ enddo
 write (fname, '(a)') 'gage_data.nc'
 rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
 rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -310,7 +310,8 @@ rcode= NF_PUT_ATT_TEXT (ncid, jgid, 'long_name', 20, 'j index of gage cell')
 rcode= NF_PUT_ATT_TEXT (ncid, jgid, 'units', 4, 'none')
 
 ndims(1)= chdim ;  ndims(2)= ngdim
-rcode= NF_DEF_VAR (ncid, 'bname_gage',  NF_CHAR, 2, ndims,  bgid)
+!!TODO:
+#rcode= NF_DEF_VAR (ncid, 'bname_gage',  NF_CHAR, 2, ndims,  bgid)
 rcode= NF_PUT_ATT_TEXT (ncid, bgid, 'long_name', 23, 'basin name at gage cell')
 rcode= NF_PUT_ATT_TEXT (ncid, bgid, 'units', 4, 'none')
 
@@ -337,7 +338,7 @@ close (10)
 deallocate (lat_idx, lon_idx)
 deallocate (lat, lon, land_frac, cell_area)
 
-   
+
 stop
 
 end

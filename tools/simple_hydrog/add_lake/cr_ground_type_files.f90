@@ -24,7 +24,9 @@ real, parameter :: mval= -9999.
 real, parameter :: erad= 6.371e+3   ! earth's radius in km
 real, parameter :: prox_ratio= 5.
 
-include '/usr/local/include/netcdf.inc'
+!!TODO:
+!!include '/usr/local/include/netcdf.inc'
+include 'netcdf.inc'
 
 integer :: i, j, k, n, l, ns, nz, j1, rcode, ncid, londim, latdim, lonbdim
 integer :: latbdim, lonid, latid, lonbid, latbid, vecdim, fill_val, attnum
@@ -78,7 +80,7 @@ character(len=15), dimension (ngtype)  :: covertypename= &
 
 character(len=8), dimension (nvar_glcc) :: vname_glcc= &
 (/ 'WaterBod', 'PWetland', 'Snow_Ice' /)
-   
+
 
 pi= 4.*atan(1.)
 dtr= pi/180.
@@ -132,7 +134,7 @@ if (lat(1) > -89.) then
     else
         stop 2
     endif
-    
+
 endif
 
 latb(1)= lat1
@@ -203,7 +205,7 @@ tex_fr= 0. ;  slptex= fill_val
 do ns= 1,nslptex
 
    write (6,*) 'read ', trim(slopetexname(ns))
-   rcode= nf_inq_varid (ncid, trim(slopetexname(ns)), varid)       
+   rcode= nf_inq_varid (ncid, trim(slopetexname(ns)), varid)
    rcode= nf_inq_vardimid (ncid, varid, dimids)
    rcode= nf_inq_dimlen (ncid, dimids(1), n)
    rcode= nf_inq_dimlen (ncid, dimids(2), l)
@@ -229,7 +231,7 @@ do ns= 1,nslptex
    rcode= nf_inq_attid (ncid, varid, 'long_name', attnum)
    if (rcode == 0) rcode= nf_get_att_text (ncid, varid, 'long_name', long_name)
    write (6,*) 'long_name= ', trim(long_name)
-   
+
    var_units= ' '
    rcode= nf_get_att_text (ncid, varid, "units", var_units)
    write (6,*) 'units= ', var_units
@@ -269,7 +271,7 @@ do ns= 1,nslptex
          endif
       enddo
    enddo
-   
+
 enddo
 
 area_st= 0. ;  sum= 0. ;  sum2= 0.
@@ -394,7 +396,7 @@ do j= 1,jd
           if (tex_fr(i,j,icoarse) /= fill_val .and. tex_fr(i,j,icoarse) > 0.) ics= 1
           if (tex_fr(i,j,imed) /= fill_val    .and. tex_fr(i,j,imed) > 0.) imd= 1
           if (tex_fr(i,j,ifine) /= fill_val   .and. tex_fr(i,j,ifine) > 0.) ifn= 1
-          
+
           if (ics == 1 .and. imd+ifn == 0) then
               gtype(i,j,igc)= tex_fr(i,j,1)
           else if (ics == 1 .and. imd+ifn == 2) then
@@ -500,7 +502,7 @@ iout= 269 ;  jout= 1
 write (6,*)
 rcode= NF_OPEN (trim(glcc_file), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open glcc netcdf file"  
+    write (6,*) "ERROR: cannot open glcc netcdf file"
     write (6,*) trim(glcc_file)
     stop 100
 endif
@@ -635,7 +637,7 @@ do n= 1,nvar_glcc
    rcode= nf_inq_attid (ncid, varid, '_FillValue', attnum)
    if (rcode == 0) rcode= nf_get_att_int (ncid, varid, '_FillValue', fill_val)
    write (6,*) 'fill_val= ', fill_val
-   
+
    scale= -99999999.
    rcode= nf_inq_attid (ncid, varid, 'scale_factor', attnum)
    if (rcode == 0) rcode= nf_get_att_double (ncid, varid, 'scale_factor', scale)
@@ -644,7 +646,7 @@ do n= 1,nvar_glcc
    rcode= nf_inq_attid (ncid, varid, 'long_name', attnum)
    if (rcode == 0) rcode= nf_get_att_text (ncid, varid, 'long_name', long_name)
    write (6,*) 'long_name= ', trim(long_name)
-   
+
    var_units= ' '
    rcode= nf_get_att_text (ncid, varid, "units", var_units)
    write (6,*) 'units= ', var_units
@@ -681,7 +683,7 @@ enddo
 
 ! ----------------------------------------------------------------------
 ! REMOVE some snow_ice points in mexico and islands
-!   lake chapala, e. mex coast, arrecife alacran (scorpion reef), 
+!   lake chapala, e. mex coast, arrecife alacran (scorpion reef),
 !   clipperton island
 ! ----------------------------------------------------------------------
 
@@ -723,7 +725,7 @@ do j= 1,jd
       endif
    enddo
 enddo
-      
+
 area_st= 0. ;  sum= 0. ;  sum2= 0. ;  kt= 0
 do j= 1,jd
    do i= 1,id
@@ -805,11 +807,11 @@ if ( interp_missing_data ) then
 ! get latitudes and longitudes of land-sea grid
 
     start= 1 ; count= 1
-    
+
     rcode= nf_inq_varid (ncid, 'lat', latid)         ! number of lats
     rcode= nf_inq_vardimid (ncid, latid, dimids)
     rcode= nf_inq_dimlen (ncid, dimids(1), jd_ls)
-    
+
     count(1)= jd_ls
     allocate (lat_ls(jd_ls))
     rcode= nf_get_vara_double (ncid, latid, start, count, lat_ls)
@@ -817,7 +819,7 @@ if ( interp_missing_data ) then
     rcode= nf_inq_varid (ncid, 'latb', latid)         ! number of lats
     rcode= nf_inq_vardimid (ncid, latid, dimids)
     rcode= nf_inq_dimlen (ncid, dimids(1), jdp1_ls)
-    
+
     count(1)= jdp1_ls
     allocate (latb_ls(jdp1_ls))
     rcode= nf_get_vara_double (ncid, latid, start, count, latb_ls)
@@ -871,7 +873,7 @@ if ( interp_missing_data ) then
     do j= 1,jd_ls
        write (10,'(360i1)') (int(lsea(i,j)), i= 1,id_ls)
     enddo
-    
+
 ! check to see if there is a gtype cell with valid data within 15 degrees lat,lon
     do j= 1,jd_ls
        do i= 1,id_ls
@@ -894,8 +896,8 @@ if ( interp_missing_data ) then
           endif
        enddo
     enddo
-    
-! expand land edges 
+
+! expand land edges
     lsea1= lsea
     do j= 1,jd_ls
        do i= 1,id_ls
@@ -914,7 +916,7 @@ if ( interp_missing_data ) then
           endif
        enddo
     enddo
-    
+
 ! check to see if there is a slope cell with valid data within 18 degrees lat,lon
     do j= 1,jd_ls
        do i= 1,id_ls
@@ -934,7 +936,7 @@ if ( interp_missing_data ) then
           endif
        enddo
     enddo
-    
+
     ls_gmask= 0 ; ktr= 0
     do j= 1,jd_ls
        do i= 1,id_ls
@@ -952,7 +954,7 @@ if ( interp_missing_data ) then
 76        continue
        enddo
     enddo
-    
+
     write (6,*) 'ls_gmask created'
     write (6,*) 'ktr= ', ktr
 
@@ -979,7 +981,7 @@ if ( interp_missing_data ) then
           if (jj2 > jd) jj2= jd
           do j2= jj1,jj2
              dlat2= rlat(j) - rlat(j2)
-             
+
 !             do i2= i,id
              ii1= i-npt ;  ii2= i+npt
              if (ii1 < 1) ii1= 1
@@ -1031,14 +1033,14 @@ if ( interp_missing_data ) then
           endif
        enddo
     enddo
-    
+
     write (6,*) 'for point at ', iout, jout, ', iget, jget= ', igt(iout,jout), jgt(iout,jout)
     do n= 1,ngtype
        write (6,*) n, gtype(igt(iout,jout),jgt(iout,jout),n)
     enddo
-    
+
     deallocate (lat_ls, lon_ls, latb_ls, lonb_ls, lsea, lsea1)
-    
+
     do j= 1,jd
        do i= 1,id
           ktr= 0
@@ -1055,9 +1057,9 @@ if ( interp_missing_data ) then
 90        continue
        enddo
     enddo
-      
+
 endif
-    
+
 !  create netcdf file
 fname_nc= 'ground_type.nc'
 rcode= NF_CREATE (trim(fname_nc), NF_NOCLOBBER, ncid)
@@ -1106,7 +1108,7 @@ rcode= NF_PUT_ATT_TEXT (ncid, zid, 'axis', 1, 'Z')
 rcode= NF_PUT_ATT_TEXT (ncid, zid, 'point_spacing', 4, 'even')
 
 !  create data variable and attributes
-   
+
 mval_out= mval
 ndims(1)= londim
 ndims(2)= latdim
@@ -1123,7 +1125,7 @@ rcode= NF_ENDDEF (ncid)
 !  write coordinate data
 
 start= 1 ;  count= 1
-      
+
 allocate (adat1(idp1))
 count(1)= id
 adat1(1:id)= lon(1:id)

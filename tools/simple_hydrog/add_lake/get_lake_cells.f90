@@ -1,6 +1,6 @@
 program cr_lake_frac_files
 
-! program creates netcdf files of lake fraction on C48 grid 
+! program creates netcdf files of lake fraction on C48 grid
 
 implicit none
 
@@ -13,7 +13,10 @@ real, parameter :: erad= 6.371e+3
 real, parameter :: lfrac_const= 0.20
 real, parameter :: mval_mdl= -9999.
 
-include '/usr/local/include/netcdf.inc'
+!!TODO:
+!!include '/usr/local/include/netcdf.inc'
+include 'netcdf.inc'
+
 
 integer :: i, j, n, l, rcode, varid, ncid, attnum, id, jd, idp1, jdp1
 integer :: latid, lonid, latbid, lonbid, latdim, latbdim, londim
@@ -74,7 +77,7 @@ close (20)
 
 rcode= NF_OPEN (trim(mask_file), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(mask_file)
     stop 1
 endif
@@ -91,7 +94,7 @@ allocate (lat_msk(jdm))
 start= 1 ;  count= 1 ;  count(1)= jdm
 rcode= nf_get_vara_double (ncid, latid, start, count, lat_msk)
 
-       
+
 rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
 if (rcode /= 0) then
     write (6,*) "ERROR: cannot find lon variable (mask)" ; stop 3
@@ -103,7 +106,7 @@ write (6,*) 'idm= ', idm
 allocate (lon_msk(idm))
 start= 1 ;  count(1)= idm
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_msk)
-  
+
 rcode= nf_close (ncid)
 
 
@@ -114,7 +117,7 @@ rcode= nf_close (ncid)
 
 rcode= NF_OPEN (trim(river_input_file(1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(river_input_file(1))
     stop 1
 endif
@@ -134,7 +137,7 @@ allocate (lat_idx(jd))
 start= 1 ;  count= 1 ;  count(1)= jd
 rcode= nf_get_vara_double (ncid, latid, start, count, lat_idx)
 
-       
+
 rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
 if (rcode /= 0) then
     rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -149,12 +152,12 @@ write (6,*) 'id= ', id
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 rcode= nf_close (ncid)
 
 
 ! ----------------------------------------------------------------------
-! now open river files -- read lat,lon grids, tocell, land_frac, 
+! now open river files -- read lat,lon grids, tocell, land_frac,
 !   cellarea, and basin
 ! ----------------------------------------------------------------------
 
@@ -193,8 +196,8 @@ do n= 1,ntiles
 
    start= 1 ;  count(1)= id ;  count(2)= jd
    rcode= nf_get_vara_double (ncid, latid, start, count, lat(:,:,n))
-       
-       
+
+
    rcode= nf_inq_varid (ncid, 'x', lonid)         ! lon field
    if (rcode /= 0) then
        write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -241,7 +244,7 @@ do n= 1,ntiles
        rcode= nf_get_att_double (ncid, varid, 'missing_value', mval_tocell)
    endif
    write (6,*) 'mval= ', mval_tocell
-   
+
    where (tocell(:,:,n) == mval_tocell) tocell(:,:,n)= mval_mdl
 
 
@@ -307,7 +310,7 @@ do n= 1,ntiles
    write (6,*) 'mval= ', mval_cella
 
    where (cell_area(:,:,n) == mval_cella) cell_area(:,:,n)= 0.
-   
+
 
    write (6,*) 'read basin, if available'
    rcode= nf_inq_varid (ncid, 'basin', varid)     ! basin field
@@ -341,10 +344,10 @@ do n= 1,ntiles
 
    where (basin(:,:,n) == mval_basin) basin(:,:,n)= mval_mdl
 75 continue
-   
+
 
    rcode= nf_close (ncid)
-   
+
    write (10,'(/"river lats, tile", i4)') n
    do j= 1,jd
       write (10,*) 'j= ', j
@@ -527,7 +530,7 @@ ktr= 0
     go to 200
 202 continue
 write (6,*) 'number of Caspian points= ', ktr-1
-             
+
 
 ! ----------------------------------------------------------------------
 !  now insert lakes in lake_frac field
@@ -563,7 +566,7 @@ do l= 1,nlake
    if (lake_frac(i,j,n) > 0.) write (6,'(a,i6,3f10.2)') "lake already present at ", &
        n, lon(i,j,n), lat(i,j,n), lake_frac(i,j,n)
    lake_frac(i,j,n)= lake_area(l)/(cell_area(i,j,n)/1.e6)
-   
+
    write (6,'(3i6,2f10.2,2f12.0,f12.3)') l, i, j, lon(i,j,n), lat(i,j,n), &
         lake_area(l), cell_area(i,j,n)/1.e6, lake_area(l)/(cell_area(i,j,n)/1.e6)
    if (lake_area(l) > cell_area(i,j,n)/1.e6) then
@@ -584,7 +587,7 @@ do n= 1,ntiles
    write (fname, '(a,i1,a)') 'lake_frac.tile', n, '.nc'
    rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
    rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -614,29 +617,29 @@ do n= 1,ntiles
    rcode= NF_DEF_VAR (ncid, 'x', NF_DOUBLE, 2, ndims, longid)
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'long_name', 20, 'Geographic longitude')
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'units', 9, 'degrees_E')
- 
+
    rcode= NF_DEF_VAR (ncid, 'y', NF_DOUBLE, 2, ndims, latgid)
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'long_name', 19, 'Geographic latitude')
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'units', 9, 'degrees_N')
- 
+
    ndims(1)= londim ;  ndims(2)= latdim
    rcode= NF_DEF_VAR (ncid, 'lake_frac', NF_DOUBLE, 2, ndims, varid)
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', 13, 'lake_fraction')
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
 !  leave define mode
    rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
    start= 1 ;  count= 1
-      
+
    count(1)= id
    rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start, count, lon_idx)
 
    count(1)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, latid, start, count, lat_idx)
-   
+
    start= 1 ;  count(1)= id ;  count(2)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, longid, start, count, lon(:,:,n))
 
@@ -644,7 +647,7 @@ do n= 1,ntiles
    rcode= NF_PUT_VARA_DOUBLE (ncid, latgid, start, count, lat(:,:,n))
 
 !    lake fraction data
-   start= 1 ;  count(1)= id ;  count(2)= jd 
+   start= 1 ;  count(1)= id ;  count(2)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, varid, start, count, lake_frac(:,:,n))
 
 !  close netcdf file
@@ -656,7 +659,7 @@ deallocate (lat, lon, tocell, land_frac, cell_area, basin)
 deallocate (lake_area_g, area_g)
 deallocate (lake_frac)
 
-   
+
 stop
 
 end
