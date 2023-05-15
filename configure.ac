@@ -223,6 +223,8 @@ AC_CONFIG_FILES([Makefile
                  tools/simple_hydrog/lakes/Makefile
                  tools/simple_hydrog/rmvpr/Makefile
                  tools/simple_hydrog/add_lake/Makefile
+                 tools/simple_hydrog/mod_river/Makefile
+                 tools/simple_hydrog/cp_slope/Makefile
                  tools/simple_hydrog/libfmslite/Makefile
 ])
 AC_OUTPUT

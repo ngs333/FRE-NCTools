@@ -3,7 +3,7 @@ program cp_slope_fields
 ! =========================================================================
 !   program reads lat, lon, cellarea, land_frac, tocell, travel,
 !     celllength, min elevation, and river-length fields, and
-!     computes the fields: slope_to_next, slope_to_ocean, 
+!     computes the fields: slope_to_next, slope_to_ocean,
 !     max_slope_to_next, and max_slope_to_ocean
 ! =========================================================================
 
@@ -33,10 +33,11 @@ logical :: mod_elev_min
 integer, dimension (maxdims)           :: start, count, dimids, ndims
 integer, dimension (ntilmx)            :: itw, ite, its, itn
 
-real, dimension (ni_cells,nj_cells)    :: out_flow = &
-    (/  8.,   4.,   2., &
-       16.,   0.,   1., &
-       32.,  64., 128. /)
+real, dimension (ni_cells,nj_cells)    :: out_flow
+!!TODO: Initialization moved below to compile.
+!!  (/  8.,   4.,   2., &
+!!       16.,   0.,   1., &
+!!       32.,  64., 128. /)
 
 character(len=100), dimension (ntilmx)  :: river_input_file
 
@@ -46,6 +47,9 @@ real, allocatable, dimension (:,:,:)    :: cell_a, tocell, land_fr, travel, &
                                            cell_l, rivlen, lat, lon, sin_lat, &
                                            cos_lat, elev_min, slope_n, slope_o, &
                                            slpn_max, slpo_max, elev
+
+
+out_flow = reshape ((/  8.,   4.,   2., 16.,   0.,   1.,  32.,  64., 128. /), shape (out_flow))
 
 pi= 4.*atan(1.)
 dtr= pi/180.
@@ -84,7 +88,7 @@ enddo
 ! ---------------------------------------------------------------------------
 rcode= NF_OPEN (trim(river_input_file(1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(river_input_file(1))
     stop 1
 endif
@@ -121,7 +125,7 @@ rcode= nf_inq_dimlen (ncid, dimids(1), id)
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 idp1= id + 1
 idp2= id + 2
 write (6,*) 'id= ', id, ', idp1= ', idp1, ', idp2= ', idp2
@@ -148,7 +152,7 @@ do n= 1,ntiles
    endif
 
    start= 1 ; count= 1
-   
+
    if (ntiles == 1) then
 !     regular grid
        rcode= nf_inq_varid (ncid, 'lat', latid)         ! number of lats
@@ -169,7 +173,7 @@ do n= 1,ntiles
        do i= 3,idp1
           lat(i,:,:)= lat(2,:,:)
        enddo
-       
+
        rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
        if (rcode /= 0) then
            rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -190,7 +194,7 @@ do n= 1,ntiles
        enddo
 
    else
-   
+
 !     cubic sphere -- assume no edge data
        rcode= nf_inq_varid (ncid, 'y', latid)         ! number of lats
        if (rcode /= 0) then
@@ -208,7 +212,7 @@ do n= 1,ntiles
 
        start= 1 ;  count(1)= id ;  count(2)= jd
        rcode= nf_get_vara_double (ncid, latid, start, count, lat(2:idp1,2:jdp1,n))
-       
+
        rcode= nf_inq_varid (ncid, 'x', lonid)         ! number of lons
        if (rcode /= 0) then
            write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -455,7 +459,7 @@ else
        write (6,'("tile ",i4, ", itw= ",i4, ", ite= ",i4, ", its= ",i4, ", itn= ",i4)') &
            n, itw(n), ite(n), its(n), itn(n)
     enddo
-       
+
     call create_halo (ntiles, id, jd, itw, ite, its, itn, tocell)
     call create_halo (ntiles, id, jd, itw, ite, its, itn, land_fr)
     call create_halo (ntiles, id, jd, itw, ite, its, itn, cell_a)
@@ -511,15 +515,15 @@ do n= 1,ntiles
    do j= 2,jdp1
       do i= 2,idp1
          if (tocell(i,j,n) == mval_mdl) go to 165
-          
+
              do jj= 1,nj_cells
                 jp= j+jj-2
-                
+
                 do ii= 1,ni_cells
                    ip=i+ii-2
-                
+
                     if (tocell(i,j,n) == out_flow(ii,jj)) then
-                    
+
                         if (ip /= i .or. jp /= j) then
                             dlat= (lat(i,j,n)-lat(ip,jp,n))*dtr
                             dlon= (lon(i,j,n)-lon(ip,jp,n))*dtr
@@ -544,8 +548,8 @@ do n= 1,ntiles
 !                            else if (travel(i,j,n) == 0.) then
 !                                slope_n(i,j,n)= 0.
                             endif
-                        endif                            
-                        
+                        endif
+
                         if (elev_min(i,j,n) /= mval_mdl .and. rivlen(i,j,n) /= mval_mdl) then
                             if (travel(i,j,n) > 0.  .and. rivlen(i,j,n) /= 0.) then
                                 slope_o(i,j,n)= elev_min(i,j,n)/rivlen(i,j,n)
@@ -553,11 +557,11 @@ do n= 1,ntiles
  !                               slope_o(i,j,n)= 0.
                             endif
                         endif
-                        
-                    endif    
+
+                    endif
                 enddo
              enddo
-      
+
 165      continue
       enddo     ! end of i loop
    enddo        ! end of j loop
@@ -595,23 +599,23 @@ do n= 1,ntiles
 !             write (6,*) n, j, i, tocell(i,j,n)
              i1= i ; j1= j ; n1= n
              ktr= 0 ;  csum= 0.
-          
+
              if (cell_a(i,j,n) == mval_mdl) then
                  write (6,'(a,2i5,2f10.3,2f10.0)') 'cell_a is missing value, ', j, i, &
                      lat(j,j,n), lon(i,j,n), tocell(i,j,n), cell_a(i,j,n)
                  stop 120
              endif
-          
+
 120          continue
              do jj= 1,nj_cells
                 jp= j1+jj-2
-                
+
                 do ii= 1,ni_cells
                    ip=i1+ii-2
-                
+
                 if (tocell(i1,j1,n1) == out_flow(ii,jj)) then
                     ktr= ktr + 1
-                    
+
                     if (ip /= i1 .or. jp /= j1) then
                         dlat= (lat(i1,j1,n)-lat(ip,jp,n))*dtr
                         dlon= (lon(i1,j1,n)-lon(ip,jp,n))*dtr
@@ -629,10 +633,10 @@ do n= 1,ntiles
                         endif
                     endif
                     csum= csum + clen
-                    
+
                     slpn_max(i,j,n)= max(slpn_max(i,j,n),slope_n(i1,j1,n1))
                     slpo_max(i,j,n)= max(slpo_max(i,j,n),slope_o(i1,j1,n1))
-                    
+
                     if (tocell(i1,j1,n1) == 0.) then
                         if (real(ktr-1) /= travel(i,j,n)) then
                             write (6,*) "ERROR: inconsistent travel"
@@ -687,26 +691,26 @@ do n= 1,ntiles
                         endif
                         go to 120
                     endif
-                    
+
                 else if (tocell(i1,j1,n1) == mval_mdl) then
-                
+
           ! tocell undefined, should not occur
                     write (6,'(a,3i5,2f10.3,3i5,2f10.3,f15.1,f7.0)') "WARNING: tocell has missing value, ", &
                        j, i, n, lat(i,j,n), lon(i,j,n), j1, i1, n1, lat(i1,j1,n1), lon(i1,j1,n1), &
                        cell_a(i1,j1,n1), land_fr(i1,j1,n1)
                     stop 170
                 endif
-                
+
                 enddo
              enddo
-      
+
 170      continue
       enddo     ! end of i loop
    enddo        ! end of j loop
 enddo           ! end of ntiles loop
 write (6,*) 'network variables computed'
 
-where (tocell == mval_mdl) 
+where (tocell == mval_mdl)
    slope_n= mval_mdl
    slope_o= mval_mdl
    slpn_max= mval_mdl
@@ -722,7 +726,7 @@ do n= 1,ntiles
    write (fname, '(a,i1,a)') 'river_network.tile', n, '.nc'
    rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
    rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-   
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -753,73 +757,73 @@ do n= 1,ntiles
    rcode= NF_PUT_ATT_TEXT (ncid, varid3, 'long_name', 28, 'direction to downstream cell')
    rcode= NF_PUT_ATT_TEXT (ncid, varid3, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid3, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'travel', NF_DOUBLE, 2, ndims, varid4)
    rcode= NF_PUT_ATT_TEXT (ncid, varid4, 'long_name', 42, &
              'cells left to travel before reaching ocean')
    rcode= NF_PUT_ATT_TEXT (ncid, varid4, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid4, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'celllength', NF_DOUBLE, 2, ndims, varid5)
    rcode= NF_PUT_ATT_TEXT (ncid, varid5, 'long_name', 11, 'cell length')
    rcode= NF_PUT_ATT_TEXT (ncid, varid5, 'units', 1, 'm')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid5, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'land_frac', NF_DOUBLE, 2, ndims, varid6)
    rcode= NF_PUT_ATT_TEXT (ncid, varid6, 'long_name', 13, 'land fraction')
    rcode= NF_PUT_ATT_TEXT (ncid, varid6, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid6, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'x', NF_DOUBLE, 2, ndims, longid)
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'long_name', 20, 'Geographic longitude')
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'units', 12, 'degrees_east')
- 
+
    rcode= NF_DEF_VAR (ncid, 'y', NF_DOUBLE, 2, ndims, latgid)
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'long_name', 19, 'Geographic latitude')
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'units', 13, 'degrees_north')
- 
+
    rcode= NF_DEF_VAR (ncid, 'rivlen', NF_DOUBLE, 2, ndims, varid2)
    rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'long_name', 12, 'river length')
    rcode= NF_PUT_ATT_TEXT (ncid, varid2, 'units', 1, 'm')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid2, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'elev_min', NF_DOUBLE, 2, ndims, varid8)
    rcode= NF_PUT_ATT_TEXT (ncid, varid8, 'long_name', 17, 'minimum elevation')
    rcode= NF_PUT_ATT_TEXT (ncid, varid8, 'units', 1, 'm')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid8, 'missing_value', NF_DOUBLE, 1, mval_mdl)
-   
+
    rcode= NF_DEF_VAR (ncid, 'slope_to_next', NF_DOUBLE, 2, ndims, varid7)
    rcode= NF_PUT_ATT_TEXT (ncid, varid7, 'long_name', 37, 'change in grid cell minimum elevation')
    rcode= NF_PUT_ATT_TEXT (ncid, varid7, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid7, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'slope_to_ocean', NF_DOUBLE, 2, ndims, varid9)
    rcode= NF_PUT_ATT_TEXT (ncid, varid9, 'long_name', 33, 'change in river minimum elevation')
    rcode= NF_PUT_ATT_TEXT (ncid, varid9, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid9, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'max_slope_to_next', NF_DOUBLE, 2, ndims, varid)
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', 26, 'max value of slope_to_next')
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'max_slope_to_ocean', NF_DOUBLE, 2, ndims, varid10)
    rcode= NF_PUT_ATT_TEXT (ncid, varid10, 'long_name', 27, 'max value of slope_to_ocean')
    rcode= NF_PUT_ATT_TEXT (ncid, varid10, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid10, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
 !  leave define mode
    rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
    start= 1 ;  count= 1
-      
+
    count(1)= id
    rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start, count, lon_idx)
 
    count(1)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, latid, start, count, lat_idx)
-   
+
    start= 1 ;  count(1)= id ;  count(2)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, longid, start, count, lon(2:idp1,2:jdp1,n))
 
@@ -849,7 +853,7 @@ do n= 1,ntiles
 !    river length data
    count(1)= id ;  count(2)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, varid2, start, count, rivlen(2:idp1,2:jdp1,n))
- 
+
 !    slope_to_next data
    count(1)= id ;  count(2)= jd
    rcode= NF_PUT_VARA_DOUBLE (ncid, varid7, start, count, slope_n(2:idp1,2:jdp1,n))
@@ -875,7 +879,7 @@ deallocate (lat, lon, sin_lat, cos_lat)
 deallocate (cell_a, tocell, land_fr, rivlen)
 deallocate (travel, cell_l, elev_min, elev)
 deallocate (slope_n, slope_o, slpn_max, slpo_max)
-   
+
 contains
 
 
@@ -906,12 +910,12 @@ else
            do j= 2,jp1
               field(1,j,n)=     field(ip1,j,itw(n))  ! western edge
            enddo
-       
+
            do j= 2,jp1
               i= ip1-j+2
               field(ip2,j,n)=  field(i,2,ite(n))     ! eastern edge
            enddo
-          
+
            do i= 2,ip1
               j= jp1-i+2
               field(i,1,n)=     field(ip1,j,its(n))  ! southern edge
@@ -925,15 +929,15 @@ else
               i= ip1-j+2
               field(1,j,n)=     field(i,jp1,itw(n))  ! western edge
            enddo
-       
+
            do j= 2,jp1
               field(ip2,j,n)=  field(2,j,ite(n))     ! eastern edge
            enddo
-       
+
            do i= 2,ip1
               field(i,1,n)=     field(i,jp1,its(n))  ! southern edge
            enddo
-       
+
            do i= 2,ip1
               j= jp1-i+2
               field(i,jp2,n)=  field(2,j,itn(n))     ! northern edge

@@ -50,7 +50,9 @@ SUBDIRS = postprocessing/combine_restarts \
           tools/simple_hydrog/postp \
           tools/simple_hydrog/lakes \
           tools/simple_hydrog/rmvpr \
-										tools/simple_hydrog/add_lake \
+          tools/simple_hydrog/add_lake \
+          tools/simple_hydrog/mod_river \
+          tools/simple_hydrog/cp_slope \
           tools/nc_null_check
 
 if ENABLE_OCEAN_MODEL_GRID_GENERATOR

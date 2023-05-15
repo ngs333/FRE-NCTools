@@ -86,7 +86,7 @@ enddo
 ! ---------------------------------------------------------------------------
 rcode= NF_OPEN (trim(river_input_file(1)), NF_NOWRITE, ncid)
 if (rcode /= 0) then
-    write (6,*) "ERROR: cannot open netcdf file"  
+    write (6,*) "ERROR: cannot open netcdf file"
     write (6,*) trim(river_input_file(1))
     stop 1
 endif
@@ -121,7 +121,7 @@ rcode= nf_inq_dimlen (ncid, dimids(1), id)
 allocate (lon_idx(id))
 start= 1 ;  count(1)= id
 rcode= nf_get_vara_double (ncid, lonid, start, count, lon_idx)
-  
+
 write (6,*) 'id= ', id
 
 rcode= nf_close (ncid)
@@ -144,7 +144,7 @@ do n= 1,ntiles
    endif
 
    start= 1 ; count= 1
-   
+
    if (ntiles == 1) then
 !     regular grid
        rcode= nf_inq_varid (ncid, 'lat', latid)         ! number of lats
@@ -165,7 +165,7 @@ do n= 1,ntiles
        do i= 2,id
           lat(i,:,:)= lat(1,:,:)
        enddo
-       
+
        rcode= nf_inq_varid (ncid, 'lon', lonid)         ! number of lons
        if (rcode /= 0) then
            rcode2 = nf_inq_varid (ncid, 'grid_x', lonid)
@@ -186,7 +186,7 @@ do n= 1,ntiles
        enddo
 
    else
-   
+
 !     cubic sphere -- assume no edge data
        rcode= nf_inq_varid (ncid, 'y', latid)         ! number of lats
        if (rcode /= 0) then
@@ -204,7 +204,7 @@ do n= 1,ntiles
 
        start= 1 ;  count(1)= id ;  count(2)= jd
        rcode= nf_get_vara_double (ncid, latid, start, count, lat(:,:,n))
-       
+
        rcode= nf_inq_varid (ncid, 'x', lonid)         ! number of lons
        if (rcode /= 0) then
            write (6,*) "ERROR: cannot find lon variable (x)" ; stop 30
@@ -396,7 +396,7 @@ do n= 1,ntiles
    write (fname, '(a,i1,a)') 'river_network_mod.tile', n, '.nc'
    rcode= NF_CREATE (trim(fname), NF_CLOBBER, ncid)
    rcode= NF_PUT_ATT_TEXT (ncid, NF_GLOBAL, 'filename', len_trim(fname), trim(fname))
-      
+
 ! ----------------------------------------------------------------------
 !  create dimensions, coordinate variables, coordinate attributes for
 !    mean files
@@ -423,36 +423,36 @@ do n= 1,ntiles
 
 !    create data variable and attributes
    ndims(1)= londim ; ndims(2)= latdim
- 
+
    rcode= NF_DEF_VAR (ncid, 'cellarea', NF_DOUBLE, 2, ndims, varid)
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'long_name', 9, 'cell area')
    rcode= NF_PUT_ATT_TEXT (ncid, varid, 'units', 2, 'm2')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'tocell', NF_DOUBLE, 2, ndims, varid3)
    rcode= NF_PUT_ATT_TEXT (ncid, varid3, 'long_name', 28, 'direction to downstream cell')
    rcode= NF_PUT_ATT_TEXT (ncid, varid3, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid3, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'land_frac', NF_DOUBLE, 2, ndims, varid6)
    rcode= NF_PUT_ATT_TEXT (ncid, varid6, 'long_name', 23, 'land/sea mask(land = 1)')
    rcode= NF_PUT_ATT_TEXT (ncid, varid6, 'units', 4, 'none')
    rcode= NF_PUT_ATT_DOUBLE (ncid, varid6, 'missing_value', NF_DOUBLE, 1, mval_mdl)
- 
+
    rcode= NF_DEF_VAR (ncid, 'x', NF_DOUBLE, 2, ndims, longid)
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'long_name', 20, 'Geographic longitude')
    rcode= NF_PUT_ATT_TEXT (ncid, longid, 'units', 12, 'degrees_east')
- 
+
    rcode= NF_DEF_VAR (ncid, 'y', NF_DOUBLE, 2, ndims, latgid)
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'long_name', 19, 'Geographic latitude')
    rcode= NF_PUT_ATT_TEXT (ncid, latgid, 'units', 13, 'degrees_north')
- 
+
 !  leave define mode
    rcode= NF_ENDDEF (ncid)
 
 !  write coordinate data
    start= 1 ;  count= 1
-      
+
    count(1)= id
    rcode= NF_PUT_VARA_DOUBLE (ncid, lonid, start, count, lon_idx)
 
@@ -486,7 +486,7 @@ deallocate (lat, lon)
 deallocate (cell_a, tocell, land_fr, tocell_casp)
 deallocate (idx, jdx, ndx, tocell_new)
 
-   
+
 stop
 
 end
