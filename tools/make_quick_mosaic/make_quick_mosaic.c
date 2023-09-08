@@ -601,12 +601,12 @@ printf("%15.10f, %15.10f, %15.10f\n", ocean_area[n][i], land_area[n][i]+AREA_RAT
     /* write out the atmosXland exchange grid file, The file name will be atmos_mosaic_tile#Xland_mosaic_tile#.nc */
     nxgrid = 0;
     for(j=0; j<ny[n]; j++) for(i=0; i<nx[n]; i++) {
-        if (land_area[n][j * nx[n] + i] > 0) {
+        if ((1>0) || land_area[n][j * nx[n] + i] > 0) {//TODO:modified
           i1[nxgrid] = i + 1;
           j1[nxgrid] = j + 1;
           i2[nxgrid] = i + 1;
           j2[nxgrid] = j + 1;
-          area[nxgrid] = land_area[n][j * nx[n] + i];
+          area[nxgrid] = 1.0; //land_area[n][j * nx[n] + i]; //TODO:modified
           di[nxgrid] = 0;
           dj[nxgrid] = 0;
           nxgrid++;
